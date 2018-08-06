@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QFileDialog
 
 import mazerunner.Config as Config
-from mazerunner.Cell import Cell, get_index
+from mazerunner.Cell import Cell, get_runner_index
 from mazerunner.solvers.AStarSolver import AStarSolver
 from mazerunner.solvers.BFSSolver import BFSSolver
 from mazerunner.solvers.BiBFSSolver import BiBFSSolver
@@ -49,13 +49,13 @@ class MazeRunner:
         y = cell.get_y()
 
         if y > 0 and not cell.get_walls().get('top'):  # Above
-            cells.append(self.cells[get_index(x, y - 1)])
-        if x < Config.MAZE_COLUMNS - 1 and not cell.get_walls().get('right'):  # Right
-            cells.append(self.cells[get_index(x + 1, y)])
-        if y < Config.MAZE_ROWS - 1 and not cell.get_walls().get('bottom'):  # Below
-            cells.append(self.cells[get_index(x, y + 1)])
+            cells.append(self.cells[get_runner_index(x, y - 1)])
+        if x < Config.RUNNER_MAZE_COLUMNS - 1 and not cell.get_walls().get('right'):  # Right
+            cells.append(self.cells[get_runner_index(x + 1, y)])
+        if y < Config.RUNNER_MAZE_ROWS - 1 and not cell.get_walls().get('bottom'):  # Below
+            cells.append(self.cells[get_runner_index(x, y + 1)])
         if x > 0 and not cell.get_walls().get('left'):  # Left
-            cells.append(self.cells[get_index(x - 1, y)])
+            cells.append(self.cells[get_runner_index(x - 1, y)])
         return cells
 
     def load_maze(self):
@@ -81,7 +81,7 @@ class MazeRunner:
             x, y = 0, 0
             walls = ['top', 'right', 'bottom', 'left']
             for line in lines[1:]:
-                cell = Cell(x, y)
+                cell = Cell(x, y, 'runner')
                 line = line.strip()
                 for i in range(len(walls)):
                     cell.set_wall(walls[i], True if int(line[i]) else False)

@@ -2,7 +2,7 @@ from random import randint
 from time import time
 
 import mazerunner.Config as Config
-from mazerunner.Cell import Cell, get_index
+from mazerunner.Cell import Cell, get_generator_index
 
 
 class MazeGenerator:
@@ -13,7 +13,7 @@ class MazeGenerator:
 
     def __init__(self, display):
         self.display = display
-        self.cells = create_cells(Config.MAZE_COLUMNS, Config.MAZE_ROWS)
+        self.cells = create_cells(Config.GENERATOR_MAZE_COLUMNS, Config.GENERATOR_MAZE_ROWS)
         self.current_cell = self.cells[0]
         self.current_cell.set_visited()
         # Set a cell as next, this is replaced with another cell before it is accessed
@@ -62,13 +62,13 @@ class MazeGenerator:
         y = cell.get_y()
 
         if y > 0:  # Above
-            neighbours.append(self.cells[get_index(x, y - 1)])
-        if x < Config.MAZE_COLUMNS - 1:  # Right
-            neighbours.append(self.cells[get_index(x + 1, y)])
-        if y < Config.MAZE_ROWS - 1:  # Below
-            neighbours.append(self.cells[get_index(x, y + 1)])
+            neighbours.append(self.cells[get_generator_index(x, y - 1)])
+        if x < Config.GENERATOR_MAZE_COLUMNS - 1:  # Right
+            neighbours.append(self.cells[get_generator_index(x + 1, y)])
+        if y < Config.GENERATOR_MAZE_ROWS - 1:  # Below
+            neighbours.append(self.cells[get_generator_index(x, y + 1)])
         if x > 0:  # Right
-            neighbours.append(self.cells[get_index(x - 1, y)])
+            neighbours.append(self.cells[get_generator_index(x - 1, y)])
         return neighbours
 
     def save_maze(self):
@@ -77,10 +77,11 @@ class MazeGenerator:
         containing a 4 bit number. The lines are the cells in order where a 1 indicates a wall (ordered top right
         bottom left). In total the file will have columns x rows + 1 lines
         """
-        filename = ".\\mazes\\maze-{}x{}-{}.txt".format(Config.MAZE_COLUMNS, Config.MAZE_ROWS, time())
+        filename = ".\\mazes\\maze-{}x{}-{}.txt".format(Config.GENERATOR_MAZE_COLUMNS, Config.GENERATOR_MAZE_ROWS,
+                                                        time())
         with open(filename, 'w') as file:
             # Write the maze dimensions
-            file.write("{} {}".format(Config.MAZE_COLUMNS, Config.MAZE_ROWS))
+            file.write("{} {}".format(Config.GENERATOR_MAZE_COLUMNS, Config.GENERATOR_MAZE_ROWS))
             for cell in self.cells:
                 # Output string will be a four bit number, where a 1 represents a wall in that position.
                 # Ordered top, right, bottom, left.
@@ -101,7 +102,7 @@ def create_cells(columns, rows):
     cells = []
     for y in range(rows):
         for x in range(columns):
-            cell = Cell(x, y)
+            cell = Cell(x, y, 'generator')
             cells.append(cell)
     return cells
 

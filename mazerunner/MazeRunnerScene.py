@@ -15,9 +15,9 @@ class MazeRunnerScene(QGraphicsScene):
 
     def init_grid(self):
         """ Initialise the grid display """
-        Config.set_cell_dimension('runner')
-        width = Config.MAZE_COLUMNS * Config.CELL_DIMENSION
-        height = Config.MAZE_ROWS * Config.CELL_DIMENSION
+        Config.set_runner_cell_dimension()
+        width = Config.RUNNER_MAZE_COLUMNS * Config.RUNNER_CELL_DIMENSION
+        height = Config.RUNNER_MAZE_ROWS * Config.RUNNER_CELL_DIMENSION
         self.setSceneRect(0, Config.WINDOW_HEIGHT * Config.MAZE_WINDOW_VERTICAL_OFFSET_FACTOR, width, height)
         self.setItemIndexMethod(QGraphicsScene.NoIndex)
 
@@ -53,8 +53,8 @@ class MazeRunnerScene(QGraphicsScene):
 
     def add_rect(self, cell, pen, brush):
         """ Add a filling rect to the scene for the given cell with the given pen and brush. """
-        rect = QRectF(cell.get_x() * Config.CELL_DIMENSION + 1, cell.get_y() * Config.CELL_DIMENSION + 1,
-                      Config.CELL_DIMENSION - 1, Config.CELL_DIMENSION - 1)
+        rect = QRectF(cell.get_x() * Config.RUNNER_CELL_DIMENSION + 1, cell.get_y() * Config.RUNNER_CELL_DIMENSION + 1,
+                      Config.RUNNER_CELL_DIMENSION - 1, Config.RUNNER_CELL_DIMENSION - 1)
         self.rects.append(self.addRect(rect, pen, brush))
 
     def delete_grid(self):
@@ -73,7 +73,7 @@ class MazeRunnerScene(QGraphicsScene):
     def draw_path(self, path):
         """ Draws a line connecting each of the cells in the given path. """
         for cell, next_cell in zip(path[:-1], path[1:]):
-            side_length = Config.CELL_DIMENSION
+            side_length = Config.RUNNER_CELL_DIMENSION
             first_xc = (cell.get_x() + 0.5) * side_length  # x position of first center
             first_yc = (cell.get_y() + 0.5) * side_length  # y position of first center
             second_xc = (next_cell.get_x() + 0.5) * side_length  # x position of second center

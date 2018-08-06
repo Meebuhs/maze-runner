@@ -7,7 +7,7 @@ class Cell:
     """ Object representing a cell on the grid. Each cell starts with all four walls which are manipulated by the maze
     generation algorithm. The state of these walls """
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, scene):
         # Coordinates of the cell
         self.x = x
         self.y = y
@@ -34,6 +34,8 @@ class Cell:
         self.cost = 0
         # Whether it has been changed since last render
         self.changed = False
+        # The scene which created this cell, determines which side dimension to use
+        self.scene = scene
         # The cell walls ordered top, right, bottom, left
         self.lines = []
         self.generate_lines()
@@ -132,7 +134,10 @@ class Cell:
         """ Populates the lines array with the cell walls defined by self.walls."""
         del self.lines[:]
 
-        side_length = Config.CELL_DIMENSION
+        if self.scene == 'runner':
+            side_length = Config.RUNNER_CELL_DIMENSION
+        else:
+            side_length = Config.GENERATOR_CELL_DIMENSION
         xc = self.x * side_length  # x position of top left corner
         yc = self.y * side_length  # y position of top left corner
 
@@ -157,10 +162,12 @@ class Cell:
         if self.solution:
             # Solution cell
             self.set_fill_display(Config.CELL_END_PEN, Config.CELL_END_BRUSH)
-        elif self.x == Config.MAZE_COLUMNS - 1 and self.y == Config.MAZE_ROWS - 1:
+            # If in the maze runner, start and goal cells are uniquely filled
+        elif self.scene == 'runner' and self.x == Config.RUNNER_MAZE_COLUMNS - 1 and \
+                self.y == Config.RUNNER_MAZE_ROWS - 1:
             # Goal cell
             self.set_fill_display(Config.CELL_END_PEN, Config.CELL_END_BRUSH)
-        elif self.get_x() == 0 and self.get_y() == 0:
+        elif self.scene == 'runner' and self.get_x() == 0 and self.get_y() == 0:
             # Start cell
             self.set_fill_display(Config.CELL_START_PEN, Config.CELL_START_BRUSH)
         elif self.get_queue():
@@ -171,8 +178,11 @@ class Cell:
             self.set_fill_display(Config.CELL_VISITED_PEN, Config.CELL_VISITED_BRUSH)
 
     def set_fill_display(self, pen, brush):
-        rect = QRectF(self.x * Config.CELL_DIMENSION + 1, self.y * Config.CELL_DIMENSION + 1,
-                      Config.CELL_DIMENSION - 1, Config.CELL_DIMENSION - 1)
+        if self.scene == 'runner':
+            side_length = Config.RUNNER_CELL_DIMENSION
+        else:
+            side_length = Config.GENERATOR_CELL_DIMENSION
+        rect = QRectF(self.x * side_length + 1, self.y * side_length + 1, side_length - 1, side_length - 1)
         self.fill_display = [rect, pen, brush]
 
     def reset(self):
@@ -251,6 +261,11 @@ class Cell:
         return False
 
 
-def get_index(x, y):
-    """ Returns the array index for the cell at position (x, y). """
-    return y * Config.MAZE_COLUMNS + x
+def get_runner_index(x, y):
+    """ Returns the array index for the cell at position (x, y) in the maze runner. """
+    return y * Config.RUNNER_MAZE_COLUMNS + x
+
+
+def get_generator_index(x, y):
+    """ Returns the array index for the cell at position (x, y) in the maze generator. """
+    return y * Config.GENERATOR_MAZE_COLUMNS + x

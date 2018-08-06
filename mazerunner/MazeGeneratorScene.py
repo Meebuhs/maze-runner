@@ -15,8 +15,8 @@ class MazeGeneratorScene(QGraphicsScene):
     def init_grid(self):
         """ Initialise the grid display """
         # Define the dimensions of the scene
-        width = Config.MAZE_COLUMNS * Config.CELL_DIMENSION
-        height = Config.MAZE_ROWS * Config.CELL_DIMENSION
+        width = Config.GENERATOR_MAZE_COLUMNS * Config.GENERATOR_CELL_DIMENSION
+        height = Config.GENERATOR_MAZE_ROWS * Config.GENERATOR_CELL_DIMENSION
         self.setSceneRect(0, Config.WINDOW_HEIGHT * Config.MAZE_WINDOW_VERTICAL_OFFSET_FACTOR, width, height)
         self.setItemIndexMethod(QGraphicsScene.NoIndex)
 
@@ -52,8 +52,9 @@ class MazeGeneratorScene(QGraphicsScene):
                 cell.changed = False
 
     def add_rect(self, cell, pen, brush):
-        rect = QRectF(cell.get_x() * Config.CELL_DIMENSION + 1, cell.get_y() * Config.CELL_DIMENSION + 1,
-                      Config.CELL_DIMENSION - 1, Config.CELL_DIMENSION - 1)
+        rect = QRectF(cell.get_x() * Config.GENERATOR_CELL_DIMENSION + 1,
+                      cell.get_y() * Config.GENERATOR_CELL_DIMENSION + 1,
+                      Config.GENERATOR_CELL_DIMENSION - 1, Config.GENERATOR_CELL_DIMENSION - 1)
         self.rects.append(self.addRect(rect, pen, brush))
 
     def set_visible(self, visible=True):
@@ -81,7 +82,7 @@ class MazeGeneratorScene(QGraphicsScene):
         """ Start maze generation """
         Config.set_generator_running(False)
         self.delete_grid()
-        Config.set_cell_dimension('generator')
+        Config.set_generator_cell_dimension()
         self.generator = MazeGenerator(self)
         self.init_grid()
         self.update_scene()

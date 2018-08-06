@@ -15,13 +15,29 @@ MAZE_WINDOW_HEIGHT_REDUCTION_FACTOR = 0.80
 global MAZE_WINDOW_VERTICAL_OFFSET_FACTOR
 MAZE_WINDOW_VERTICAL_OFFSET_FACTOR = -0.025
 
-# Dimensions of the maze
-global MAZE_COLUMNS
-MAZE_COLUMNS = 24
-global MAZE_ROWS
-MAZE_ROWS = 12
-global CELL_DIMENSION
-CELL_DIMENSION = 50
+# Default dimensions of the maze
+global DEFAULT_MAZE_COLUMNS
+DEFAULT_MAZE_COLUMNS = 24
+global DEFAULT_MAZE_ROWS
+DEFAULT_MAZE_ROWS = 12
+global DEFAULT_CELL_DIMENSION
+DEFAULT_CELL_DIMENSION = 50
+
+# Runner dimensions of the maze
+global RUNNER_MAZE_COLUMNS
+RUNNER_MAZE_COLUMNS = DEFAULT_MAZE_COLUMNS
+global RUNNER_MAZE_ROWS
+RUNNER_MAZE_ROWS = DEFAULT_MAZE_ROWS
+global RUNNER_CELL_DIMENSION
+RUNNER_CELL_DIMENSION = DEFAULT_CELL_DIMENSION
+
+# Generator dimensions of the maze
+global GENERATOR_MAZE_COLUMNS
+GENERATOR_MAZE_COLUMNS = DEFAULT_MAZE_COLUMNS
+global GENERATOR_MAZE_ROWS
+GENERATOR_MAZE_ROWS = DEFAULT_MAZE_ROWS
+global GENERATOR_CELL_DIMENSION
+GENERATOR_CELL_DIMENSION = DEFAULT_CELL_DIMENSION
 
 # Pens for drawing cell walls
 global CELL_WALL_PEN
@@ -82,24 +98,43 @@ def set_window_dimensions(width, height, scene=None):
     set_cell_dimension(scene)
 
 
-def set_maze_dimensions(columns, rows, scene=None):
+def set_maze_dimensions(columns, rows, scene):
     """ Sets the dimensions of the maze to the given columns and rows. """
-    global MAZE_COLUMNS
-    global MAZE_ROWS
-    MAZE_COLUMNS = columns
-    MAZE_ROWS = rows
+    if scene == 'runner':
+        global RUNNER_MAZE_COLUMNS
+        global RUNNER_MAZE_ROWS
+        RUNNER_MAZE_COLUMNS = columns
+        RUNNER_MAZE_ROWS = rows
+    elif scene == 'generator':
+        global GENERATOR_MAZE_COLUMNS
+        global GENERATOR_MAZE_ROWS
+        GENERATOR_MAZE_COLUMNS = columns
+        GENERATOR_MAZE_ROWS = rows
     set_cell_dimension(scene)
 
 
-def set_cell_dimension(scene=None):
+def set_cell_dimension(scene):
+    """ Calls the appropriate cell dimension method based on the scene from which it's called. """
+    if scene == 'runner':
+        set_runner_cell_dimension()
+    elif scene == 'generator':
+        set_generator_cell_dimension()
+
+
+def set_runner_cell_dimension():
     """ Calculates an appropriate cell side length which allows the grid to be drawn on screen. This is not executed the
     scene is currently processing"""
-    if scene == 'runner':
-        if RUNNER_RUNNING:
-            return
-    elif scene == 'generator':
-        if GENERATOR_RUNNING:
-            return
-    global CELL_DIMENSION
-    CELL_DIMENSION = min(floor(WINDOW_WIDTH * MAZE_WINDOW_WIDTH_REDUCTION_FACTOR / MAZE_COLUMNS),
-                         floor(WINDOW_HEIGHT * MAZE_WINDOW_HEIGHT_REDUCTION_FACTOR / MAZE_ROWS))
+    if not RUNNER_RUNNING:
+        global RUNNER_CELL_DIMENSION
+        RUNNER_CELL_DIMENSION = min(floor(WINDOW_WIDTH * MAZE_WINDOW_WIDTH_REDUCTION_FACTOR / RUNNER_MAZE_COLUMNS),
+                                    floor(WINDOW_HEIGHT * MAZE_WINDOW_HEIGHT_REDUCTION_FACTOR / RUNNER_MAZE_ROWS))
+
+
+def set_generator_cell_dimension():
+    """ Calculates an appropriate cell side length which allows the grid to be drawn on screen. This is not executed the
+    scene is currently processing"""
+    if not GENERATOR_RUNNING:
+        global GENERATOR_CELL_DIMENSION
+        GENERATOR_CELL_DIMENSION = min(
+            floor(WINDOW_WIDTH * MAZE_WINDOW_WIDTH_REDUCTION_FACTOR / GENERATOR_MAZE_COLUMNS),
+            floor(WINDOW_HEIGHT * MAZE_WINDOW_HEIGHT_REDUCTION_FACTOR / GENERATOR_MAZE_ROWS))

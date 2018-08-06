@@ -13,4 +13,4 @@ class GreedySolver(InformedSolver):
 
     def calculate_cost(self, cell):
         """ Calculates the estimated distance from a cell to the goal cell using manhattan distance. """
-        return Config.MAZE_COLUMNS - cell.get_x() + Config.MAZE_ROWS - cell.get_y()
+        return Config.RUNNER_MAZE_COLUMNS - cell.get_x() + Config.RUNNER_MAZE_ROWS - cell.get_y()

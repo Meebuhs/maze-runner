@@ -18,9 +18,9 @@ class AStarSolver(InformedSolver):
         """ Calculates the estimated distance from the start cell to the goal cell, via the given cell using euclidean
         distance for the heuristic h(c). """
         return cell.get_cost() + sqrt(
-            (Config.MAZE_COLUMNS - cell.get_x()) ** 2 + (Config.MAZE_ROWS - cell.get_y()) ** 2)
+            (Config.RUNNER_MAZE_COLUMNS - cell.get_x()) ** 2 + (Config.RUNNER_MAZE_ROWS - cell.get_y()) ** 2)
 
     def calculate_cost(self, cell):
         """ Calculates the estimated distance from the start cell to the goal cell, via the given cell using manhattan
         distance for the heuristic h(c). """
-        return cell.get_cost() + Config.MAZE_COLUMNS - cell.get_x() + Config.MAZE_ROWS - cell.get_y()
+        return cell.get_cost() + Config.RUNNER_MAZE_COLUMNS - cell.get_x() + Config.RUNNER_MAZE_ROWS - cell.get_y()

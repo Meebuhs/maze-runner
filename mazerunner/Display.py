@@ -92,7 +92,7 @@ class TabWidget(QWidget):
         self.columnsText = QLineEdit(self.generatorTab)
         self.columnsText.setGeometry(QRect(65, 10, 90, 30))
         self.columnsText.setValidator(QIntValidator(1, 99))
-        self.columnsText.setText(str(Config.MAZE_COLUMNS))
+        self.columnsText.setText(str(Config.GENERATOR_MAZE_COLUMNS))
 
         self.rowsLabel = QLabel(self.generatorTab)
         self.rowsLabel.setText('Rows:')
@@ -100,7 +100,7 @@ class TabWidget(QWidget):
         self.rowsText = QLineEdit(self.generatorTab)
         self.rowsText.setGeometry(QRect(205, 10, 90, 30))
         self.rowsText.setValidator(QIntValidator(1, 99))
-        self.rowsText.setText(str(Config.MAZE_ROWS))
+        self.rowsText.setText(str(Config.GENERATOR_MAZE_ROWS))
 
         self.startGenerationButton = QPushButton(self.generatorTab)
         self.startGenerationButton.setGeometry(QRect(305, 10, 90, 30))
@@ -163,7 +163,7 @@ class TabWidget(QWidget):
     @pyqtSlot()
     def start_generation_on_click(self):
         """ Starts the generation of a maze of the size defined by the user """
-        Config.set_maze_dimensions(int(self.columnsText.text()), int(self.rowsText.text()))
+        Config.set_maze_dimensions(int(self.columnsText.text()), int(self.rowsText.text()), 'generator')
         self.generatorScene.start_generation_on_click()
         self.maze_generated = True
 
