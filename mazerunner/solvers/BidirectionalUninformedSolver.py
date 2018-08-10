@@ -19,15 +19,23 @@ class BidirectionalUninformedSolver:
         self.b_current_cell = Cell(0, 0, 'runner')
         self.b_goal_cell = Cell(0, 0, 'runner')
 
-    def run(self):
-        """ Performs the Bidirectional Uninformed Search. The queue behaviour is defined by inheriting solvers. """
+    def start(self):
+        """ Starts the solver."""
+        self.initialise()
+        self.run()
+
+    def initialise(self):
+        """ Initialises the start and goal cells for the search. """
         self.f_queue.append(self.runner.cells[0])
         self.b_queue.append(
             self.runner.cells[get_runner_index(Config.RUNNER_MAZE_COLUMNS - 1, Config.RUNNER_MAZE_ROWS - 1)])
         self.f_goal_cell = self.b_queue[0]
         self.b_goal_cell = self.f_queue[0]
+
+    def run(self):
+        """ Performs the Bidirectional Uninformed Search. The queue behaviour is defined by inheriting solvers. """
         while True:
-            if not Config.get_runner_running():
+            if not Config.get_runner_running() or Config.get_pause_runner():
                 break
             self.f_current_cell = self.get_next_cell(self.f_queue)
             self.b_current_cell = self.get_next_cell(self.b_queue)
@@ -60,6 +68,10 @@ class BidirectionalUninformedSolver:
                         cell.set_b_parent(self.b_current_cell)
                         cell.set_queue()
             self.runner.display.update_scene()
+
+    def recommence(self):
+        """ Recommence the search. """
+        self.run()
 
     def construct_path(self, cell):
         """ Constructs the solution path by traversing the search tree which was constructed. Bidirectional search exits

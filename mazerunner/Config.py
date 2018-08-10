@@ -45,9 +45,9 @@ GENERATOR_RUNNING = False
 RUNNER_RUNNING = False
 
 # Flags for controlling runner and generation processes
-PAUSE_RUNNER = False
+RUNNER_PAUSED = False
 RENDER_RUNNER_PROGRESS = True
-PAUSE_GENERATOR = False
+GENERATOR_PAUSED = False
 RENDER_GENERATOR_PROGRESS = True
 
 
@@ -68,10 +68,20 @@ def set_generator_running(value=True):
     GENERATOR_RUNNING = value
 
 
+def get_pause_runner():
+    """ Returns the runner paused flag. """
+    return RUNNER_PAUSED
+
+
 def set_pause_runner(value=True):
     """ Sets the runner paused flag to value, true by default. """
     global RUNNER_PAUSED
     RUNNER_PAUSED = value
+
+
+def get_pause_generator():
+    """ Returns the generator paused flag. """
+    return GENERATOR_PAUSED
 
 
 def set_pause_generator(value=True):

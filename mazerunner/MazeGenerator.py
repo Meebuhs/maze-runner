@@ -32,6 +32,8 @@ class MazeGenerator:
     def generate(self):
         """ Start the depth first search algorithm to generate the maze """
         while True:
+            if Config.get_pause_generator():
+                break
             self.next_cell = self.select_neighbours(self.current_cell)
             if self.next_cell:
                 self.visited_cells.append(self.current_cell)
@@ -47,6 +49,10 @@ class MazeGenerator:
                 self.finished = True
                 self.display.update_scene()
                 break
+
+    def recommence(self):
+        """ Recommence the maze generation. """
+        self.generate()
 
     def select_neighbours(self, cell):
         """ Checks the neighbouring cells and if there exists at least one unvisited neighbour, one is selected randomly

@@ -189,7 +189,12 @@ class TabWidget(QWidget):
     @pyqtSlot()
     def toggle_pause_runner(self):
         """ Toggles the paused state of the runner. """
-        Config.set_pause_runner(self.pauseSearchButton.isChecked())
+        if self.pauseSearchButton.isChecked():
+            Config.set_pause_runner()
+        else:
+            Config.set_pause_runner(False)
+            if not self.runnerScene.runner.get_solved():
+                self.runnerScene.runner.recommence()
 
     @pyqtSlot()
     def toggle_render_runner(self):
@@ -216,7 +221,12 @@ class TabWidget(QWidget):
     @pyqtSlot()
     def toggle_pause_generator(self):
         """ Toggles the paused state of the generator. """
-        Config.set_pause_generator(self.pauseGenerationButton.isChecked())
+        if self.pauseGenerationButton.isChecked():
+            Config.set_pause_generator()
+        else:
+            Config.set_pause_generator(False)
+            if not self.generatorScene.generator.get_finished():
+                self.generatorScene.generator.recommence()
 
     @pyqtSlot()
     def toggle_render_generator(self):

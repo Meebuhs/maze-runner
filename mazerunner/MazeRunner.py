@@ -34,7 +34,7 @@ class MazeRunner:
             self.solver = GreedySolver(self)
         elif search_option == 'A*':
             self.solver = AStarSolver(self)
-        self.solver.run()
+        self.solver.start()
 
     def reset_search(self):
         """ Resets the status of all cells to allow a new search to begin. """
@@ -94,6 +94,10 @@ class MazeRunner:
         if len(self.cells) != columns * rows:
             return False
         return True
+
+    def recommence(self):
+        """ Recommence the solver. """
+        self.solver.recommence()
 
     def get_cells(self):
         """ Returns the cells """
