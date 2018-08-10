@@ -24,7 +24,7 @@ class App(QMainWindow):
         self.height = Config.WINDOW_HEIGHT
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
-        self.setWindowIcon(QIcon('resources/icon-512.png'))
+        self.setWindowIcon(QIcon('..\\resources\\icon-512.png'))
 
         # Set up tabs
         self.tab_widget = TabWidget(self)
