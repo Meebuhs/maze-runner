@@ -81,12 +81,14 @@ class MazeRunnerScene(QGraphicsScene):
             self.path.append(self.addLine(QLineF(first_xc, first_yc, second_xc, second_yc), Config.CELL_WALL_PEN))
 
     def update_scene(self, path=None):
-        """ Update the display. If a path is provided, it will also be drawn. """
-        self.update_grid()
-        if path is not None:
-            self.draw_path(path)
-        self.update()
-        QCoreApplication.processEvents()
+        """ If rendering is not suppressed or if the runner has finished, the display is updated. If a path is provided,
+        it will also be drawn. """
+        if Config.get_render_runner() or self.runner.get_solved():
+            self.update_grid()
+            if path is not None:
+                self.draw_path(path)
+            self.update()
+            QCoreApplication.processEvents()
 
     def load_maze_on_click(self):
         """ Attempt to load a maze from a file and draw it on screen. Returns true if successfully loaded, false if not.

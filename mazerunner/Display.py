@@ -201,12 +201,11 @@ class TabWidget(QWidget):
         """ Starts the generation of a maze of the size defined by the user """
         Config.set_maze_dimensions(int(self.columnsText.text()), int(self.rowsText.text()), 'generator')
         self.generatorScene.start_generation_on_click()
-        self.maze_generated = True
 
     @pyqtSlot()
     def save_maze_on_click(self):
         """ Saves the generated maze """
-        if self.maze_generated:
+        if self.generatorScene.generator.get_finished():
             self.generatorScene.save_maze_on_click()
             self.generatorConsoleLabel.setText('Maze saved')
             self.fade_label(self.generatorConsoleLabel)

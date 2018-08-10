@@ -80,10 +80,20 @@ def set_pause_generator(value=True):
     GENERATOR_PAUSED = value
 
 
+def get_render_runner():
+    """ Returns the runner render flag. """
+    return RENDER_RUNNER_PROGRESS
+
+
 def set_render_runner(value=True):
     """ Sets the runner render flag to value, true by default. """
     global RENDER_RUNNER_PROGRESS
     RENDER_RUNNER_PROGRESS = value
+
+
+def get_render_generator():
+    """ Returns the generator render flag. """
+    return RENDER_GENERATOR_PROGRESS
 
 
 def set_render_generator(value=True):
