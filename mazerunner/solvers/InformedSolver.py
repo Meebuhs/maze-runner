@@ -16,14 +16,22 @@ class InformedSolver:
         self.current_cell = Cell(0, 0, 'runner')
         self.goal_cell = Cell(0, 0, 'runner')
 
-    def run(self):
-        """ Performs the informed search. The cost function f(c) is defined by inheriting solvers. """
+    def start(self):
+        """ Starts the solver."""
+        self.initialise()
+        self.run()
+
+    def initialise(self):
+        """ Initialises the start and goal cells for the search. """
         self.queue.put((self.calculate_cost(self.runner.cells[0]), self.runner.cells[0]))
         self.runner.cells[0].set_cost(0)
         self.goal_cell = self.runner.cells[
             get_runner_index(Config.RUNNER_MAZE_COLUMNS - 1, Config.RUNNER_MAZE_ROWS - 1)]
+
+    def run(self):
+        """ Performs the informed search. The cost function f(c) is defined by inheriting solvers. """
         while True:
-            if not Config.get_runner_running():
+            if not Config.get_runner_running() or Config.get_pause_runner():
                 break
             self.current_cell = self.queue.get()[1]
             self.current_cell.set_visited()
@@ -40,6 +48,10 @@ class InformedSolver:
                         cell.set_cost(self.current_cell.get_cost() + 1)
                         cell.set_queue()
             self.runner.display.update_scene()
+
+    def recommence(self):
+        """ Recommence the search. """
+        self.run()
 
     def construct_path(self):
         """ Constructs the solution path to the current cell by traversing the search tree which was constructed. """

@@ -73,10 +73,11 @@ class MazeGeneratorScene(QGraphicsScene):
                 self.removeItem(old_rect_display)
 
     def update_scene(self):
-        """ Update the display. """
-        self.update_grid()
-        self.update()
-        QCoreApplication.processEvents()
+        """ If rendering is not suppressed or if the runner has finished, the display is updated. """
+        if Config.get_render_generator() or self.generator.get_finished():
+            self.update_grid()
+            self.update()
+            QCoreApplication.processEvents()
 
     def start_generation_on_click(self):
         """ Start maze generation """

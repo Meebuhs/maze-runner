@@ -66,18 +66,31 @@ class TabWidget(QWidget):
         self.loadMazeButton.clicked.connect(self.load_maze_on_click)
 
         self.searchMethodComboBox = QComboBox(self.runnerTab)
-        self.searchMethodComboBox.setGeometry(110, 11, 150, 28)
+        self.searchMethodComboBox.setGeometry(110, 11, 200, 28)
         search_options = ['Breadth First Search', 'Bidirectional BFS', 'Depth First Search', 'Bidirectional DFS',
                           'Greedy Best First', 'A*']
         self.searchMethodComboBox.addItems(search_options)
 
         self.startSearchButton = QPushButton(self.runnerTab)
-        self.startSearchButton.setGeometry(QRect(270, 10, 90, 30))
+        self.startSearchButton.setGeometry(QRect(320, 10, 90, 30))
         self.startSearchButton.setText("Start")
         self.startSearchButton.clicked.connect(self.start_search_on_click)
 
+        self.pauseSearchButton = QPushButton(self.runnerTab)
+        self.pauseSearchButton.setGeometry(QRect(420, 10, 90, 30))
+        self.pauseSearchButton.setText("Pause")
+        self.pauseSearchButton.setCheckable(True)
+        self.pauseSearchButton.clicked.connect(self.toggle_pause_runner)
+
+        self.renderSearchButton = QPushButton(self.runnerTab)
+        self.renderSearchButton.setGeometry(QRect(520, 10, 150, 30))
+        self.renderSearchButton.setText("Show Progress")
+        self.renderSearchButton.setCheckable(True)
+        self.renderSearchButton.setChecked(True)
+        self.renderSearchButton.clicked.connect(self.toggle_render_runner)
+
         self.runnerConsoleLabel = QLabel(self.runnerTab)
-        self.runnerConsoleLabel.setGeometry(370, 10, 1000, 30)
+        self.runnerConsoleLabel.setGeometry(680, 10, 1000, 30)
         self.runnerConsoleLabel.setText('')
 
         # Initialise the maze generator
@@ -112,8 +125,21 @@ class TabWidget(QWidget):
         self.saveMazeButton.setText("Save Maze")
         self.saveMazeButton.clicked.connect(self.save_maze_on_click)
 
+        self.pauseGenerationButton = QPushButton(self.generatorTab)
+        self.pauseGenerationButton.setGeometry(QRect(505, 10, 90, 30))
+        self.pauseGenerationButton.setText("Pause")
+        self.pauseGenerationButton.setCheckable(True)
+        self.pauseGenerationButton.clicked.connect(self.toggle_pause_generator)
+
+        self.renderGenerationButton = QPushButton(self.generatorTab)
+        self.renderGenerationButton.setGeometry(QRect(605, 10, 150, 30))
+        self.renderGenerationButton.setText("Show Progress")
+        self.renderGenerationButton.setCheckable(True)
+        self.renderGenerationButton.setChecked(True)
+        self.renderGenerationButton.clicked.connect(self.toggle_render_generator)
+
         self.generatorConsoleLabel = QLabel(self.generatorTab)
-        self.generatorConsoleLabel.setGeometry(505, 10, 1000, 30)
+        self.generatorConsoleLabel.setGeometry(765, 10, 1000, 30)
         self.generatorConsoleLabel.setText('')
 
         # Add tabs to layout
@@ -161,22 +187,51 @@ class TabWidget(QWidget):
             self.fade_label(self.runnerConsoleLabel)
 
     @pyqtSlot()
+    def toggle_pause_runner(self):
+        """ Toggles the paused state of the runner. """
+        if self.pauseSearchButton.isChecked():
+            Config.set_pause_runner()
+        else:
+            Config.set_pause_runner(False)
+            if not self.runnerScene.runner.get_solved():
+                self.runnerScene.runner.recommence()
+
+    @pyqtSlot()
+    def toggle_render_runner(self):
+        """ Toggles the render state of the runner. """
+        Config.set_render_runner(self.renderSearchButton.isChecked())
+
+    @pyqtSlot()
     def start_generation_on_click(self):
         """ Starts the generation of a maze of the size defined by the user """
         Config.set_maze_dimensions(int(self.columnsText.text()), int(self.rowsText.text()), 'generator')
         self.generatorScene.start_generation_on_click()
-        self.maze_generated = True
 
     @pyqtSlot()
     def save_maze_on_click(self):
         """ Saves the generated maze """
-        if self.maze_generated:
+        if self.generatorScene.generator.get_finished():
             self.generatorScene.save_maze_on_click()
             self.generatorConsoleLabel.setText('Maze saved')
             self.fade_label(self.generatorConsoleLabel)
         else:
             self.generatorConsoleLabel.setText('Generate a maze first')
             self.fade_label(self.generatorConsoleLabel)
+
+    @pyqtSlot()
+    def toggle_pause_generator(self):
+        """ Toggles the paused state of the generator. """
+        if self.pauseGenerationButton.isChecked():
+            Config.set_pause_generator()
+        else:
+            Config.set_pause_generator(False)
+            if not self.generatorScene.generator.get_finished():
+                self.generatorScene.generator.recommence()
+
+    @pyqtSlot()
+    def toggle_render_generator(self):
+        """ Toggles the render state of the generator. """
+        Config.set_render_generator(self.renderGenerationButton.isChecked())
 
 
 def except_hook(cls, exception, traceback):

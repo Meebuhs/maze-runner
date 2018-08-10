@@ -2,7 +2,7 @@ from math import floor
 
 from PyQt5.QtGui import QPen, QColor, QBrush
 
-""" Store global constants """
+""" Store global constants. """
 # Dimensions of the program window
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
@@ -44,11 +44,16 @@ CELL_END_BRUSH = QBrush(QColor(102, 187, 106))
 GENERATOR_RUNNING = False
 RUNNER_RUNNING = False
 
+# Flags for controlling runner and generation processes
+RUNNER_PAUSED = False
+RENDER_RUNNER_PROGRESS = True
+GENERATOR_PAUSED = False
+RENDER_GENERATOR_PROGRESS = True
 
-def set_generator_running(value=True):
-    """ Sets the generator running flag to value, true by default. """
-    global GENERATOR_RUNNING
-    GENERATOR_RUNNING = value
+
+def get_runner_running():
+    """ Returns the runner running flag. """
+    return RUNNER_RUNNING
 
 
 def set_runner_running(value=True):
@@ -57,9 +62,54 @@ def set_runner_running(value=True):
     RUNNER_RUNNING = value
 
 
-def get_runner_running():
-    """ Gets the runner running flag. """
-    return RUNNER_RUNNING
+def set_generator_running(value=True):
+    """ Sets the generator running flag to value, true by default. """
+    global GENERATOR_RUNNING
+    GENERATOR_RUNNING = value
+
+
+def get_pause_runner():
+    """ Returns the runner paused flag. """
+    return RUNNER_PAUSED
+
+
+def set_pause_runner(value=True):
+    """ Sets the runner paused flag to value, true by default. """
+    global RUNNER_PAUSED
+    RUNNER_PAUSED = value
+
+
+def get_pause_generator():
+    """ Returns the generator paused flag. """
+    return GENERATOR_PAUSED
+
+
+def set_pause_generator(value=True):
+    """ Sets the generator paused flag to value, true by default. """
+    global GENERATOR_PAUSED
+    GENERATOR_PAUSED = value
+
+
+def get_render_runner():
+    """ Returns the runner render flag. """
+    return RENDER_RUNNER_PROGRESS
+
+
+def set_render_runner(value=True):
+    """ Sets the runner render flag to value, true by default. """
+    global RENDER_RUNNER_PROGRESS
+    RENDER_RUNNER_PROGRESS = value
+
+
+def get_render_generator():
+    """ Returns the generator render flag. """
+    return RENDER_GENERATOR_PROGRESS
+
+
+def set_render_generator(value=True):
+    """ Sets the generator render flag to value, true by default. """
+    global RENDER_GENERATOR_PROGRESS
+    RENDER_GENERATOR_PROGRESS = value
 
 
 def set_window_dimensions(width, height, scene=None):
@@ -96,7 +146,7 @@ def set_cell_dimension(scene):
 
 def set_runner_cell_dimension():
     """ Calculates an appropriate cell side length which allows the grid to be drawn on screen. This is not executed the
-    scene is currently processing"""
+    scene is currently processing. """
     if not RUNNER_RUNNING:
         global RUNNER_CELL_DIMENSION
         RUNNER_CELL_DIMENSION = min(floor(WINDOW_WIDTH * MAZE_WINDOW_WIDTH_REDUCTION_FACTOR / RUNNER_MAZE_COLUMNS),
@@ -105,7 +155,7 @@ def set_runner_cell_dimension():
 
 def set_generator_cell_dimension():
     """ Calculates an appropriate cell side length which allows the grid to be drawn on screen. This is not executed the
-    scene is currently processing"""
+    scene is currently processing. """
     if not GENERATOR_RUNNING:
         global GENERATOR_CELL_DIMENSION
         GENERATOR_CELL_DIMENSION = min(

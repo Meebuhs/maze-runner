@@ -19,14 +19,21 @@ class MazeGenerator:
         # Set a cell as next, this is replaced with another cell before it is accessed
         self.next_cell = self.cells[1]
         self.visited_cells = []
+        self.finished = False
 
     def get_cells(self):
         """ Returns the cells """
         return self.cells
 
+    def get_finished(self):
+        """ Returns whether the generator has finished """
+        return self.finished
+
     def generate(self):
         """ Start the depth first search algorithm to generate the maze """
         while True:
+            if Config.get_pause_generator():
+                break
             self.next_cell = self.select_neighbours(self.current_cell)
             if self.next_cell:
                 self.visited_cells.append(self.current_cell)
@@ -39,7 +46,13 @@ class MazeGenerator:
                 self.current_cell = self.visited_cells.pop()
             else:
                 Config.set_generator_running(False)
+                self.finished = True
+                self.display.update_scene()
                 break
+
+    def recommence(self):
+        """ Recommence the maze generation. """
+        self.generate()
 
     def select_neighbours(self, cell):
         """ Checks the neighbouring cells and if there exists at least one unvisited neighbour, one is selected randomly
