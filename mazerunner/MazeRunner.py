@@ -58,7 +58,7 @@ class MazeRunner:
         if y < Config.RUNNER_MAZE_ROWS - 1 and not cell.get_walls().get('bottom'):
             cells.append(self.cells[get_index(x, y + 1)])
         # Left, check cell to the left's right wall
-        if x > 0 and not self.cells[get_index(x - 1, y)].get_walls().get('left'):
+        if x > 0 and not self.cells[get_index(x - 1, y)].get_walls().get('right'):
             cells.append(self.cells[get_index(x - 1, y)])
         return cells
 
