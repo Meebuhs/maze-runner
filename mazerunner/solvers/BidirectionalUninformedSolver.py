@@ -1,5 +1,5 @@
 import mazerunner.Config as Config
-from mazerunner.Cell import Cell, get_runner_index
+from mazerunner.RunnerCell import RunnerCell, get_index
 
 
 class BidirectionalUninformedSolver:
@@ -14,10 +14,10 @@ class BidirectionalUninformedSolver:
         self.b_queue = []
         # Current and goal cells for forward and backward searches
         # The cells assigned here are discarded once search is commenced
-        self.f_current_cell = Cell(0, 0, 'runner')
-        self.f_goal_cell = Cell(0, 0, 'runner')
-        self.b_current_cell = Cell(0, 0, 'runner')
-        self.b_goal_cell = Cell(0, 0, 'runner')
+        self.f_current_cell = RunnerCell(0, 0, True, True)
+        self.f_goal_cell = RunnerCell(0, 0, True, True)
+        self.b_current_cell = RunnerCell(0, 0, True, True)
+        self.b_goal_cell = RunnerCell(0, 0, True, True)
 
     def start(self):
         """ Starts the solver."""
@@ -28,7 +28,7 @@ class BidirectionalUninformedSolver:
         """ Initialises the start and goal cells for the search. """
         self.f_queue.append(self.runner.cells[0])
         self.b_queue.append(
-            self.runner.cells[get_runner_index(Config.RUNNER_MAZE_COLUMNS - 1, Config.RUNNER_MAZE_ROWS - 1)])
+            self.runner.cells[get_index(Config.RUNNER_MAZE_COLUMNS - 1, Config.RUNNER_MAZE_ROWS - 1)])
         self.f_goal_cell = self.b_queue[0]
         self.b_goal_cell = self.f_queue[0]
 
