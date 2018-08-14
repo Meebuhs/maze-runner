@@ -1,5 +1,5 @@
 import mazerunner.Config as Config
-from mazerunner.Cell import Cell, get_runner_index
+from mazerunner.RunnerCell import RunnerCell, get_index
 
 
 class UninformedSolver:
@@ -10,8 +10,8 @@ class UninformedSolver:
         self.path = []
         self.queue = []
         # Current and goal cells, the cells assigned here are discarded once search is commenced
-        self.current_cell = Cell(0, 0, 'runner')
-        self.goal_cell = Cell(0, 0, 'runner')
+        self.current_cell = RunnerCell(0, 0, True, True)
+        self.goal_cell = RunnerCell(0, 0, True, True)
 
     def start(self):
         """ Starts the solver."""
@@ -22,7 +22,7 @@ class UninformedSolver:
         """ Initialises the start and goal cells for the search. """
         self.queue.append(self.runner.cells[0])
         self.goal_cell = self.runner.cells[
-            get_runner_index(Config.RUNNER_MAZE_COLUMNS - 1, Config.RUNNER_MAZE_ROWS - 1)]
+            get_index(Config.RUNNER_MAZE_COLUMNS - 1, Config.RUNNER_MAZE_ROWS - 1)]
 
     def run(self):
         """ Performs an uninformed search. The queue behaviour is defined by solvers which inherit from this one. """

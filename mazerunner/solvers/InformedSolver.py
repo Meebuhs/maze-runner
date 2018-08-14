@@ -1,7 +1,7 @@
 from queue import PriorityQueue
 
 import mazerunner.Config as Config
-from mazerunner.Cell import Cell, get_runner_index
+from mazerunner.RunnerCell import RunnerCell, get_index
 
 
 class InformedSolver:
@@ -13,8 +13,8 @@ class InformedSolver:
         self.path = []
         self.queue = PriorityQueue(maxsize=0)
         # Current and goal cells, the cells assigned here are discarded once search is commenced
-        self.current_cell = Cell(0, 0, 'runner')
-        self.goal_cell = Cell(0, 0, 'runner')
+        self.current_cell = RunnerCell(0, 0, True, True)
+        self.goal_cell = RunnerCell(0, 0, True, True)
 
     def start(self):
         """ Starts the solver."""
@@ -26,7 +26,7 @@ class InformedSolver:
         self.queue.put((self.calculate_cost(self.runner.cells[0]), self.runner.cells[0]))
         self.runner.cells[0].set_cost(0)
         self.goal_cell = self.runner.cells[
-            get_runner_index(Config.RUNNER_MAZE_COLUMNS - 1, Config.RUNNER_MAZE_ROWS - 1)]
+            get_index(Config.RUNNER_MAZE_COLUMNS - 1, Config.RUNNER_MAZE_ROWS - 1)]
 
     def run(self):
         """ Performs the informed search. The cost function f(c) is defined by inheriting solvers. """
