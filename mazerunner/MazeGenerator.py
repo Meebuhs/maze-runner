@@ -2,7 +2,7 @@ from random import randint
 from time import time
 
 import mazerunner.Config as Config
-from mazerunner.Cell import Cell, get_generator_index
+from mazerunner.GeneratorCell import GeneratorCell, get_index
 
 
 class MazeGenerator:
@@ -75,13 +75,13 @@ class MazeGenerator:
         y = cell.get_y()
 
         if y > 0:  # Above
-            neighbours.append(self.cells[get_generator_index(x, y - 1)])
+            neighbours.append(self.cells[get_index(x, y - 1)])
         if x < Config.GENERATOR_MAZE_COLUMNS - 1:  # Right
-            neighbours.append(self.cells[get_generator_index(x + 1, y)])
+            neighbours.append(self.cells[get_index(x + 1, y)])
         if y < Config.GENERATOR_MAZE_ROWS - 1:  # Below
-            neighbours.append(self.cells[get_generator_index(x, y + 1)])
+            neighbours.append(self.cells[get_index(x, y + 1)])
         if x > 0:  # Right
-            neighbours.append(self.cells[get_generator_index(x - 1, y)])
+            neighbours.append(self.cells[get_index(x - 1, y)])
         return neighbours
 
     def save_maze(self):
@@ -96,10 +96,10 @@ class MazeGenerator:
             # Write the maze dimensions
             file.write("{} {}".format(Config.GENERATOR_MAZE_COLUMNS, Config.GENERATOR_MAZE_ROWS))
             for cell in self.cells:
-                # Output string will be a four bit number, where a 1 represents a wall in that position.
-                # Ordered top, right, bottom, left.
+                # Output string will be a two bit number, where a 1 represents a wall in that position.
+                # Ordered bottom, right.
                 output = ''
-                walls = ['top', 'right', 'bottom', 'left']
+                walls = ['bottom', 'right']
                 for wall in walls:
                     if cell.walls.get(wall):
                         output += str(1)
@@ -115,7 +115,7 @@ def create_cells(columns, rows):
     cells = []
     for y in range(rows):
         for x in range(columns):
-            cell = Cell(x, y, 'generator')
+            cell = GeneratorCell(x, y)
             cells.append(cell)
     return cells
 
@@ -125,15 +125,11 @@ def remove_walls(current_cell, next_cell):
     dx = current_cell.get_x() - next_cell.get_x()
     dy = current_cell.get_y() - next_cell.get_y()
 
-    if dx == 1:  # Moved left
-        current_cell.set_wall('left', False)
+    if dx == 1:  # Moved left, remove other cells right wall
         next_cell.set_wall('right', False)
-    elif dx == -1:  # Moved right
+    elif dx == -1:  # Moved right, remove this cells right wall
         current_cell.set_wall('right', False)
-        next_cell.set_wall('left', False)
-    elif dy == 1:  # Moved down
-        current_cell.set_wall('top', False)
+    elif dy == 1:  # Moved down, remove this cells bottom wall
         next_cell.set_wall('bottom', False)
-    elif dy == -1:  # Moved up
+    elif dy == -1:  # Moved up, remove other cells bottom wall
         current_cell.set_wall('bottom', False)
-        next_cell.set_wall('top', False)
