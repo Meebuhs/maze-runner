@@ -1,3 +1,5 @@
+from math import floor
+
 from PyQt5.QtCore import QRectF, QLineF, QCoreApplication
 from PyQt5.QtWidgets import QGraphicsScene
 
@@ -12,12 +14,16 @@ class MazeRunnerScene(QGraphicsScene):
         super().__init__()
         self.runner = MazeRunner(self)
         self.path = []
+        self.columns = Config.DEFAULT_MAZE_COLUMNS
+        self.rows = Config.DEFAULT_MAZE_ROWS
+        self.cell_dimension = Config.DEFAULT_CELL_DIMENSION
+        self.render_progress = True
 
     def init_grid(self):
         """ Initialise the grid display """
-        Config.set_runner_cell_dimension()
-        width = Config.RUNNER_MAZE_COLUMNS * Config.RUNNER_CELL_DIMENSION
-        height = Config.RUNNER_MAZE_ROWS * Config.RUNNER_CELL_DIMENSION
+        self.set_cell_dimension()
+        width = self.columns * self.cell_dimension
+        height = self.rows * self.cell_dimension
         self.setSceneRect(0, Config.WINDOW_HEIGHT * Config.MAZE_WINDOW_VERTICAL_OFFSET_FACTOR, width, height)
         self.setItemIndexMethod(QGraphicsScene.NoIndex)
 
@@ -53,8 +59,8 @@ class MazeRunnerScene(QGraphicsScene):
 
     def add_rect(self, cell, pen, brush):
         """ Add a filling rect to the scene for the given cell with the given pen and brush. """
-        rect = QRectF(cell.get_x() * Config.RUNNER_CELL_DIMENSION + 1, cell.get_y() * Config.RUNNER_CELL_DIMENSION + 1,
-                      Config.RUNNER_CELL_DIMENSION - 1, Config.RUNNER_CELL_DIMENSION - 1)
+        rect = QRectF(cell.get_x() * self.cell_dimension + 1, cell.get_y() * self.cell_dimension + 1,
+                      self.cell_dimension - 1, self.cell_dimension - 1)
         self.rects.append(self.addRect(rect, pen, brush))
 
     def delete_grid(self):
@@ -73,17 +79,16 @@ class MazeRunnerScene(QGraphicsScene):
     def draw_path(self, path):
         """ Draws a line connecting each of the cells in the given path. """
         for cell, next_cell in zip(path[:-1], path[1:]):
-            side_length = Config.RUNNER_CELL_DIMENSION
-            first_xc = (cell.get_x() + 0.5) * side_length  # x position of first center
-            first_yc = (cell.get_y() + 0.5) * side_length  # y position of first center
-            second_xc = (next_cell.get_x() + 0.5) * side_length  # x position of second center
-            second_yc = (next_cell.get_y() + 0.5) * side_length  # y position of second center
+            first_xc = (cell.get_x() + 0.5) * self.cell_dimension  # x position of first center
+            first_yc = (cell.get_y() + 0.5) * self.cell_dimension  # y position of first center
+            second_xc = (next_cell.get_x() + 0.5) * self.cell_dimension  # x position of second center
+            second_yc = (next_cell.get_y() + 0.5) * self.cell_dimension  # y position of second center
             self.path.append(self.addLine(QLineF(first_xc, first_yc, second_xc, second_yc), Config.CELL_WALL_PEN))
 
     def update_scene(self, path=None):
         """ If rendering is not suppressed or if the runner has finished, the display is updated. If a path is provided,
         it will also be drawn. """
-        if Config.get_render_runner() or self.runner.get_solved():
+        if self.render_progress or self.runner.get_solved():
             self.update_grid()
             if path is not None:
                 self.draw_path(path)
@@ -93,7 +98,7 @@ class MazeRunnerScene(QGraphicsScene):
     def load_maze_on_click(self):
         """ Attempt to load a maze from a file and draw it on screen. Returns true if successfully loaded, false if not.
         """
-        Config.set_runner_running(False)
+        self.runner.set_running(False)
         self.delete_grid()
         self.runner.reset_search()
         if self.runner.load_maze():
@@ -104,9 +109,39 @@ class MazeRunnerScene(QGraphicsScene):
 
     def start_search_on_click(self, search_option):
         """ Prepare the solver to start a new search and start it. """
-        Config.set_runner_running(False)
+        self.runner.set_running(False)
         self.delete_grid()
         self.runner.reset_search()
         self.init_grid()
-        Config.set_runner_running()
+        self.runner.set_running(True)
         self.runner.start_search(search_option)
+
+    def get_columns(self):
+        """ Returns the number of columns in the grid. """
+        return self.columns
+
+    def get_rows(self):
+        """ Returns the number of rows in the grid. """
+        return self.rows
+
+    def get_cell_dimension(self):
+        """ Returns the side length of a cell in the grid. """
+        return self.cell_dimension
+
+    def set_maze_dimensions(self, columns, rows):
+        """ Sets the dimensions of the maze to the given columns and rows. """
+        self.columns = columns
+        self.rows = rows
+        self.set_cell_dimension()
+
+    def set_cell_dimension(self):
+        """ Calculates an appropriate cell side length which allows the grid to be drawn on screen. This is not executed the
+        scene is currently processing. """
+        if not self.runner.get_running():
+            self.cell_dimension = min(
+                floor(Config.WINDOW_WIDTH * Config.MAZE_WINDOW_WIDTH_REDUCTION_FACTOR / self.columns),
+                floor(Config.WINDOW_HEIGHT * Config.MAZE_WINDOW_HEIGHT_REDUCTION_FACTOR / self.rows))
+
+    def set_render_progress(self, value):
+        """ Sets the render flag to the given value. """
+        self.render_progress = value

@@ -1,5 +1,4 @@
-import mazerunner.Config as Config
-from mazerunner.RunnerCell import RunnerCell, get_index
+from mazerunner.RunnerCell import RunnerCell
 
 
 class BidirectionalUninformedSolver:
@@ -14,10 +13,10 @@ class BidirectionalUninformedSolver:
         self.b_queue = []
         # Current and goal cells for forward and backward searches
         # The cells assigned here are discarded once search is commenced
-        self.f_current_cell = RunnerCell(0, 0, True, True)
-        self.f_goal_cell = RunnerCell(0, 0, True, True)
-        self.b_current_cell = RunnerCell(0, 0, True, True)
-        self.b_goal_cell = RunnerCell(0, 0, True, True)
+        self.f_current_cell = RunnerCell(0, 0, True, True, self.runner)
+        self.f_goal_cell = RunnerCell(0, 0, True, True, self.runner)
+        self.b_current_cell = RunnerCell(0, 0, True, True, self.runner)
+        self.b_goal_cell = RunnerCell(0, 0, True, True, self.runner)
 
     def start(self):
         """ Starts the solver."""
@@ -27,15 +26,15 @@ class BidirectionalUninformedSolver:
     def initialise(self):
         """ Initialises the start and goal cells for the search. """
         self.f_queue.append(self.runner.cells[0])
-        self.b_queue.append(
-            self.runner.cells[get_index(Config.RUNNER_MAZE_COLUMNS - 1, Config.RUNNER_MAZE_ROWS - 1)])
+        self.b_queue.append(self.runner.cells[
+                                self.runner.get_cell_index(self.runner.get_columns() - 1, self.runner.get_rows() - 1)])
         self.f_goal_cell = self.b_queue[0]
         self.b_goal_cell = self.f_queue[0]
 
     def run(self):
         """ Performs the Bidirectional Uninformed Search. The queue behaviour is defined by inheriting solvers. """
         while True:
-            if not Config.get_runner_running() or Config.get_pause_runner():
+            if not self.runner.get_running() or self.runner.get_paused():
                 break
             self.f_current_cell = self.get_next_cell(self.f_queue)
             self.b_current_cell = self.get_next_cell(self.b_queue)
