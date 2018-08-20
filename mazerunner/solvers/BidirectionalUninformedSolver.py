@@ -41,11 +41,11 @@ class BidirectionalUninformedSolver:
 
             self.f_current_cell.set_f_visited()
             self.f_current_cell.set_visited()
-            self.f_current_cell.set_queue(False)
+            self.f_current_cell.set_in_queue(False)
 
             self.b_current_cell.set_visited()
             self.b_current_cell.set_b_visited()
-            self.b_current_cell.set_queue(False)
+            self.b_current_cell.set_in_queue(False)
 
             # If the two paths have overlapped, break the loop
             if self.f_current_cell.both_visited():
@@ -59,13 +59,13 @@ class BidirectionalUninformedSolver:
                     if cell.get_f_parent() is None:
                         self.f_queue.append(cell)
                         cell.set_f_parent(self.f_current_cell)
-                        cell.set_queue()
+                        cell.set_in_queue()
 
                 for cell in self.runner.get_neighbours(self.b_current_cell):
                     if cell.get_b_parent() is None:
                         self.b_queue.append(cell)
                         cell.set_b_parent(self.b_current_cell)
-                        cell.set_queue()
+                        cell.set_in_queue()
             self.runner.display.update_scene()
 
     def recommence(self):

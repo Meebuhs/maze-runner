@@ -22,36 +22,8 @@ class MazeGenerator:
         self.paused = False
         self.finished = False
 
-    def set_running(self, value):
-        """ Sets the running flag to the given value. """
-        self.running = value
-
-    def get_running(self):
-        """ Returns the running status. """
-        return self.running
-
-    def set_paused(self, value):
-        """ Sets the paused flag to the given value. """
-        self.paused = value
-
-    def get_paused(self):
-        """ Returns the paused status. """
-        return self.paused
-
-    def get_cells(self):
-        """ Returns the cells """
-        return self.cells
-
-    def get_finished(self):
-        """ Returns whether the generator has finished """
-        return self.finished
-
-    def get_cell_index(self, x, y):
-        """ Returns the array index for the cell at position (x, y). """
-        return y * self.display.get_columns() + x
-
     def generate(self):
-        """ Start the depth first search algorithm to generate the maze """
+        """ Start the depth first search algorithm to generate the maze. """
         while True:
             if not self.running or self.paused:
                 break
@@ -59,7 +31,7 @@ class MazeGenerator:
             if self.next_cell:
                 self.visited_cells.append(self.current_cell)
                 self.next_cell.set_visited()
-                self.next_cell.set_queue(False)
+                self.next_cell.set_in_queue(False)
                 remove_walls(self.current_cell, self.next_cell)
                 self.current_cell = self.next_cell
                 self.display.update_scene()
@@ -83,7 +55,7 @@ class MazeGenerator:
         for neighbour in neighbours:
             if not neighbour.get_visited():
                 unvisited.append(neighbour)
-                neighbour.set_queue()
+                neighbour.set_in_queue()
         if len(unvisited) > 0:
             return unvisited[randint(0, len(unvisited) - 1)]
         else:
@@ -126,6 +98,30 @@ class MazeGenerator:
                     else:
                         output += str(0)
                 file.write("\n{}".format(output))
+
+    def get_cells(self):
+        """ Returns the cells. """
+        return self.cells
+
+    def get_running(self):
+        """ Returns the running status. """
+        return self.running
+
+    def set_running(self, value):
+        """ Sets the running flag to the given value. """
+        self.running = value
+
+    def set_paused(self, value):
+        """ Sets the paused flag to the given value. """
+        self.paused = value
+
+    def get_finished(self):
+        """ Returns whether the generator has finished. """
+        return self.finished
+
+    def get_cell_index(self, x, y):
+        """ Returns the array index for the cell at position (x, y). """
+        return y * self.display.get_columns() + x
 
     def get_cell_dimension(self):
         """ Returns the side length of a cell in the grid. """

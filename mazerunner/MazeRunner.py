@@ -10,7 +10,7 @@ from mazerunner.solvers.GreedySolver import GreedySolver
 
 
 class MazeRunner:
-    """ Generates a maze using depth first search """
+    """ Generates a maze using depth first search. """
 
     def __init__(self, display):
         self.display = display
@@ -22,7 +22,7 @@ class MazeRunner:
         self.solved = False
 
     def start_search(self, search_option):
-        """ Calls the appropriate search function based on searchOption """
+        """ Calls the appropriate search function based on the search option. """
         if search_option == 'Breadth First Search':
             self.solver = BFSSolver(self)
         elif search_option == 'Bidirectional BFS':
@@ -102,32 +102,28 @@ class MazeRunner:
         self.solver.recommence()
 
     def get_cells(self):
-        """ Returns the cells """
+        """ Returns the cells. """
         return self.cells
-
-    def get_solved(self):
-        """ Returns the solved status. """
-        return self.solved
 
     def get_running(self):
         """ Returns the running status. """
         return self.running
 
-    def get_paused(self):
-        """ Returns the paused status. """
-        return self.paused
-
-    def get_cell_index(self, x, y):
-        """ Returns the array index for the cell at position (x, y). """
-        return y * self.display.get_columns() + x
-
     def set_running(self, value):
         """ Sets the running flag to the given value. """
         self.running = value
 
+    def get_paused(self):
+        """ Returns the paused status. """
+        return self.paused
+
     def set_paused(self, value):
         """ Sets the paused flag to the given value. """
         self.paused = value
+
+    def get_solved(self):
+        """ Returns the solved status. """
+        return self.solved
 
     def get_columns(self):
         """ Returns the number of columns in the grid. """
@@ -140,3 +136,7 @@ class MazeRunner:
     def get_cell_dimension(self):
         """ Returns the side length of a cell in the grid. """
         return self.display.get_cell_dimension()
+
+    def get_cell_index(self, x, y):
+        """ Returns the array index for the cell at position (x, y). """
+        return y * self.display.get_columns() + x

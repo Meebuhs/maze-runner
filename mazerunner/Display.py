@@ -12,7 +12,7 @@ from mazerunner.MazeRunnerScene import MazeRunnerScene
 
 
 class App(QMainWindow):
-    """ Defines the main application window """
+    """ Defines the main application window. """
 
     def __init__(self):
         super().__init__()
@@ -39,7 +39,7 @@ class App(QMainWindow):
 
 
 class TabWidget(QWidget):
-    """ Defines the tab view """
+    """ Defines the tab view. """
 
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
@@ -55,101 +55,102 @@ class TabWidget(QWidget):
         self.tabs = QTabWidget()
 
         # Initialise the maze runner
-        self.runnerScene = MazeRunnerScene()
-        self.runnerTab = QGraphicsView()
-        self.runnerTab.setViewportUpdateMode(QGraphicsView.NoViewportUpdate)
-        self.runnerTab.setScene(self.runnerScene)
+        self.runner_scene = MazeRunnerScene()
+        self.runner_tab = QGraphicsView()
+        self.runner_tab.setViewportUpdateMode(QGraphicsView.NoViewportUpdate)
+        self.runner_tab.setScene(self.runner_scene)
 
-        self.loadMazeButton = QPushButton(self.runnerTab)
-        self.loadMazeButton.setGeometry(QRect(10, 10, 90, 30))
-        self.loadMazeButton.setText("Load Maze")
-        self.loadMazeButton.clicked.connect(self.load_maze_on_click)
+        self.runner_load_maze_button = QPushButton(self.runner_tab)
+        self.runner_load_maze_button.setGeometry(QRect(10, 10, 90, 30))
+        self.runner_load_maze_button.setText("Load Maze")
+        self.runner_load_maze_button.clicked.connect(self.load_maze_on_click)
 
-        self.searchMethodComboBox = QComboBox(self.runnerTab)
-        self.searchMethodComboBox.setGeometry(110, 11, 200, 28)
+        self.runner_search_combobox = QComboBox(self.runner_tab)
+        self.runner_search_combobox.setGeometry(110, 11, 200, 28)
+        # New solvers need to be added to this list and added to start_search in maze-runner/MazeRunner.py
         search_options = ['Breadth First Search', 'Bidirectional BFS', 'Depth First Search', 'Bidirectional DFS',
                           'Greedy Best First', 'A*']
-        self.searchMethodComboBox.addItems(search_options)
+        self.runner_search_combobox.addItems(search_options)
 
-        self.startSearchButton = QPushButton(self.runnerTab)
-        self.startSearchButton.setGeometry(QRect(320, 10, 90, 30))
-        self.startSearchButton.setText("Start")
-        self.startSearchButton.clicked.connect(self.start_search_on_click)
+        self.runner_start_button = QPushButton(self.runner_tab)
+        self.runner_start_button.setGeometry(QRect(320, 10, 90, 30))
+        self.runner_start_button.setText("Start")
+        self.runner_start_button.clicked.connect(self.start_search_on_click)
 
-        self.pauseSearchButton = QPushButton(self.runnerTab)
-        self.pauseSearchButton.setGeometry(QRect(420, 10, 90, 30))
-        self.pauseSearchButton.setText("Pause")
-        self.pauseSearchButton.setCheckable(True)
-        self.pauseSearchButton.clicked.connect(self.toggle_pause_runner)
+        self.runner_pause_button = QPushButton(self.runner_tab)
+        self.runner_pause_button.setGeometry(QRect(420, 10, 90, 30))
+        self.runner_pause_button.setText("Pause")
+        self.runner_pause_button.setCheckable(True)
+        self.runner_pause_button.clicked.connect(self.toggle_pause_runner)
 
-        self.renderSearchButton = QPushButton(self.runnerTab)
-        self.renderSearchButton.setGeometry(QRect(520, 10, 150, 30))
-        self.renderSearchButton.setText("Show Progress")
-        self.renderSearchButton.setCheckable(True)
-        self.renderSearchButton.setChecked(True)
-        self.renderSearchButton.clicked.connect(self.toggle_render_runner)
+        self.runner_render_progress_button = QPushButton(self.runner_tab)
+        self.runner_render_progress_button.setGeometry(QRect(520, 10, 150, 30))
+        self.runner_render_progress_button.setText("Show Progress")
+        self.runner_render_progress_button.setCheckable(True)
+        self.runner_render_progress_button.setChecked(True)
+        self.runner_render_progress_button.clicked.connect(self.toggle_render_runner)
 
-        self.runnerConsoleLabel = QLabel(self.runnerTab)
-        self.runnerConsoleLabel.setGeometry(680, 10, 1000, 30)
-        self.runnerConsoleLabel.setText('')
+        self.runner_console_label = QLabel(self.runner_tab)
+        self.runner_console_label.setGeometry(680, 10, 1000, 30)
+        self.runner_console_label.setText('')
 
         # Initialise the maze generator
-        self.generatorScene = MazeGeneratorScene()
-        self.generatorTab = QGraphicsView()
-        self.generatorTab.setViewportUpdateMode(QGraphicsView.NoViewportUpdate)
-        self.generatorTab.setScene(self.generatorScene)
+        self.generator_scene = MazeGeneratorScene()
+        self.generator_tab = QGraphicsView()
+        self.generator_tab.setViewportUpdateMode(QGraphicsView.NoViewportUpdate)
+        self.generator_tab.setScene(self.generator_scene)
 
-        self.columnsLabel = QLabel(self.generatorTab)
-        self.columnsLabel.setText('Columns:')
-        self.columnsLabel.setGeometry(10, 10, 45, 30)
-        self.columnsText = QLineEdit(self.generatorTab)
-        self.columnsText.setGeometry(QRect(65, 10, 90, 30))
-        self.columnsText.setValidator(QIntValidator(1, 99))
-        self.columnsText.setText(str(Config.DEFAULT_MAZE_COLUMNS))
+        self.generator_columns_label = QLabel(self.generator_tab)
+        self.generator_columns_label.setText('Columns:')
+        self.generator_columns_label.setGeometry(10, 10, 45, 30)
+        self.generator_columns_line_edit = QLineEdit(self.generator_tab)
+        self.generator_columns_line_edit.setGeometry(QRect(65, 10, 90, 30))
+        self.generator_columns_line_edit.setValidator(QIntValidator(1, 99))
+        self.generator_columns_line_edit.setText(str(Config.DEFAULT_MAZE_COLUMNS))
 
-        self.rowsLabel = QLabel(self.generatorTab)
-        self.rowsLabel.setText('Rows:')
-        self.rowsLabel.setGeometry(165, 10, 30, 30)
-        self.rowsText = QLineEdit(self.generatorTab)
-        self.rowsText.setGeometry(QRect(205, 10, 90, 30))
-        self.rowsText.setValidator(QIntValidator(1, 99))
-        self.rowsText.setText(str(Config.DEFAULT_MAZE_ROWS))
+        self.generator_rows_label = QLabel(self.generator_tab)
+        self.generator_rows_label.setText('Rows:')
+        self.generator_rows_label.setGeometry(165, 10, 30, 30)
+        self.generator_rows_line_edit = QLineEdit(self.generator_tab)
+        self.generator_rows_line_edit.setGeometry(QRect(205, 10, 90, 30))
+        self.generator_rows_line_edit.setValidator(QIntValidator(1, 99))
+        self.generator_rows_line_edit.setText(str(Config.DEFAULT_MAZE_ROWS))
 
-        self.startGenerationButton = QPushButton(self.generatorTab)
-        self.startGenerationButton.setGeometry(QRect(305, 10, 90, 30))
-        self.startGenerationButton.setText("Generate")
-        self.startGenerationButton.clicked.connect(self.start_generation_on_click)
+        self.generator_start_button = QPushButton(self.generator_tab)
+        self.generator_start_button.setGeometry(QRect(305, 10, 90, 30))
+        self.generator_start_button.setText("Generate")
+        self.generator_start_button.clicked.connect(self.start_generation_on_click)
 
-        self.saveMazeButton = QPushButton(self.generatorTab)
-        self.saveMazeButton.setGeometry(QRect(405, 10, 90, 30))
-        self.saveMazeButton.setText("Save Maze")
-        self.saveMazeButton.clicked.connect(self.save_maze_on_click)
+        self.generator_save_button = QPushButton(self.generator_tab)
+        self.generator_save_button.setGeometry(QRect(405, 10, 90, 30))
+        self.generator_save_button.setText("Save Maze")
+        self.generator_save_button.clicked.connect(self.save_maze_on_click)
 
-        self.pauseGenerationButton = QPushButton(self.generatorTab)
-        self.pauseGenerationButton.setGeometry(QRect(505, 10, 90, 30))
-        self.pauseGenerationButton.setText("Pause")
-        self.pauseGenerationButton.setCheckable(True)
-        self.pauseGenerationButton.clicked.connect(self.toggle_pause_generator)
+        self.generator_pause_button = QPushButton(self.generator_tab)
+        self.generator_pause_button.setGeometry(QRect(505, 10, 90, 30))
+        self.generator_pause_button.setText("Pause")
+        self.generator_pause_button.setCheckable(True)
+        self.generator_pause_button.clicked.connect(self.toggle_pause_generator)
 
-        self.renderGenerationButton = QPushButton(self.generatorTab)
-        self.renderGenerationButton.setGeometry(QRect(605, 10, 150, 30))
-        self.renderGenerationButton.setText("Show Progress")
-        self.renderGenerationButton.setCheckable(True)
-        self.renderGenerationButton.setChecked(True)
-        self.renderGenerationButton.clicked.connect(self.toggle_render_generator)
+        self.generator_render_progress_button = QPushButton(self.generator_tab)
+        self.generator_render_progress_button.setGeometry(QRect(605, 10, 150, 30))
+        self.generator_render_progress_button.setText("Show Progress")
+        self.generator_render_progress_button.setCheckable(True)
+        self.generator_render_progress_button.setChecked(True)
+        self.generator_render_progress_button.clicked.connect(self.toggle_render_generator)
 
-        self.generatorConsoleLabel = QLabel(self.generatorTab)
-        self.generatorConsoleLabel.setGeometry(765, 10, 1000, 30)
-        self.generatorConsoleLabel.setText('')
+        self.generator_console_label = QLabel(self.generator_tab)
+        self.generator_console_label.setGeometry(765, 10, 1000, 30)
+        self.generator_console_label.setText('')
 
         # Add tabs to layout
-        self.tabs.addTab(self.runnerTab, "Maze Runner")
-        self.tabs.addTab(self.generatorTab, "Maze Generator")
+        self.tabs.addTab(self.runner_tab, "Maze Runner")
+        self.tabs.addTab(self.generator_tab, "Maze Generator")
         self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
 
     def fade_label(self, label):
-        """ Fades a label out over a 3 second duration """
+        """ Fades a label out over a 3 second duration. """
         fade = QGraphicsOpacityEffect()
         label.setGraphicsEffect(fade)
         animation = QPropertyAnimation(fade, b"opacity")
@@ -164,74 +165,75 @@ class TabWidget(QWidget):
         QTimer.singleShot(4000, self.clear_consoles)
 
     def clear_consoles(self):
-        """ Resets the text in the console labels """
-        self.runnerConsoleLabel.setText('')
-        self.generatorConsoleLabel.setText('')
+        """ Resets the text in the console labels. """
+        self.runner_console_label.setText('')
+        self.generator_console_label.setText('')
 
     @pyqtSlot(name="runner_load_maze")
     def load_maze_on_click(self):
-        """ Attempts to load a maze from file """
-        if not self.runnerScene.load_maze_on_click():
-            self.runnerConsoleLabel.setText('Maze not loaded.')
-            self.fade_label(self.runnerConsoleLabel)
+        """ Attempts to load a maze from file. """
+        if not self.runner_scene.load_maze_on_click():
+            self.runner_console_label.setText('Maze not loaded.')
+            self.fade_label(self.runner_console_label)
         else:
             self.maze_loaded = True
 
     @pyqtSlot(name="runner_start_search")
     def start_search_on_click(self):
-        """ If a maze is loaded, the selected search method will be used to find a solution to the maze """
+        """ If a maze is loaded, the selected search method will be used to find a solution to the maze. """
         if self.maze_loaded:
-            self.runnerScene.start_search_on_click(self.searchMethodComboBox.currentText())
+            self.runner_scene.start_search_on_click(self.runner_search_combobox.currentText())
         else:
-            self.runnerConsoleLabel.setText('Load a maze first')
-            self.fade_label(self.runnerConsoleLabel)
+            self.runner_console_label.setText('Load a maze first')
+            self.fade_label(self.runner_console_label)
 
     @pyqtSlot(name="runner_pause")
     def toggle_pause_runner(self):
         """ Toggles the paused state of the runner. """
-        if self.pauseSearchButton.isChecked():
-            self.runnerScene.runner.set_paused(True)
+        if self.runner_pause_button.isChecked():
+            self.runner_scene.runner.set_paused(True)
         else:
-            self.runnerScene.runner.set_paused(False)
-            if not self.runnerScene.runner.get_solved() and self.runnerScene.runner.solver is not None:
-                self.runnerScene.runner.recommence()
+            self.runner_scene.runner.set_paused(False)
+            if not self.runner_scene.runner.get_solved() and self.runner_scene.runner.solver is not None:
+                self.runner_scene.runner.recommence()
 
     @pyqtSlot(name="runner_render_progress")
     def toggle_render_runner(self):
         """ Toggles the render state of the runner. """
-        self.runnerScene.set_render_progress(self.renderSearchButton.isChecked())
+        self.runner_scene.set_render_progress(self.runner_render_progress_button.isChecked())
 
     @pyqtSlot(name="generator_start")
     def start_generation_on_click(self):
-        """ Starts the generation of a maze of the size defined by the user """
-        self.generatorScene.set_maze_dimensions(int(self.columnsText.text()), int(self.rowsText.text()))
-        self.generatorScene.start_generation_on_click()
+        """ Starts the generation of a maze of the size defined by the user. """
+        self.generator_scene.set_maze_dimensions(int(self.generator_columns_line_edit.text()),
+                                                 int(self.generator_rows_line_edit.text()))
+        self.generator_scene.start_generation_on_click()
 
     @pyqtSlot(name="generator_save_maze")
     def save_maze_on_click(self):
-        """ Saves the generated maze """
-        if self.generatorScene.generator.get_finished():
-            self.generatorScene.save_maze_on_click()
-            self.generatorConsoleLabel.setText('Maze saved')
-            self.fade_label(self.generatorConsoleLabel)
+        """ Saves the generated maze. """
+        if self.generator_scene.generator.get_finished():
+            self.generator_scene.save_maze_on_click()
+            self.generator_console_label.setText('Maze saved')
+            self.fade_label(self.generator_console_label)
         else:
-            self.generatorConsoleLabel.setText('Generate a maze first')
-            self.fade_label(self.generatorConsoleLabel)
+            self.generator_console_label.setText('Generate a maze first')
+            self.fade_label(self.generator_console_label)
 
     @pyqtSlot(name="generator_pause")
     def toggle_pause_generator(self):
         """ Toggles the paused state of the generator. """
-        if self.pauseGenerationButton.isChecked():
-            self.generatorScene.generator.set_paused(True)
+        if self.generator_pause_button.isChecked():
+            self.generator_scene.generator.set_paused(True)
         else:
-            self.generatorScene.generator.set_paused(False)
-            if not self.generatorScene.generator.get_finished():
-                self.generatorScene.generator.recommence()
+            self.generator_scene.generator.set_paused(False)
+            if not self.generator_scene.generator.get_finished():
+                self.generator_scene.generator.recommence()
 
     @pyqtSlot(name="generator_render_progress")
     def toggle_render_generator(self):
         """ Toggles the render state of the generator. """
-        self.generatorScene.set_render_progress(self.renderGenerationButton.isChecked())
+        self.generator_scene.set_render_progress(self.generator_render_progress_button.isChecked())
 
 
 def except_hook(cls, exception, traceback):

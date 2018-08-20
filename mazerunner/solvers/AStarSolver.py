@@ -13,13 +13,13 @@ class AStarSolver(InformedSolver):
     def __init__(self, runner):
         InformedSolver.__init__(self, runner)
 
+    def calculate_cost(self, cell):
+        """ Calculates the estimated distance from the start cell to the goal cell, via the given cell using manhattan
+        distance for the heuristic h(c). """
+        return cell.get_cost() + self.runner.get_columns() - cell.get_x() + self.runner.get_rows() - cell.get_y()
+
     def calculate_cost_euclidean(self, cell):
         """ Calculates the estimated distance from the start cell to the goal cell, via the given cell using euclidean
         distance for the heuristic h(c). """
         return cell.get_cost() + sqrt(
             (self.runner.get_columns() - cell.get_x()) ** 2 + (self.runner.get_rows() - cell.get_y()) ** 2)
-
-    def calculate_cost(self, cell):
-        """ Calculates the estimated distance from the start cell to the goal cell, via the given cell using manhattan
-        distance for the heuristic h(c). """
-        return cell.get_cost() + self.runner.get_columns() - cell.get_x() + self.runner.get_rows() - cell.get_y()

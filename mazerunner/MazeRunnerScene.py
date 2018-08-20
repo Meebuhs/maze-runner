@@ -8,7 +8,7 @@ from mazerunner.MazeRunner import MazeRunner
 
 
 class MazeRunnerScene(QGraphicsScene):
-    """ Defines the maze runner scene """
+    """ Defines the maze runner scene. """
 
     def __init__(self):
         super().__init__()
@@ -20,7 +20,7 @@ class MazeRunnerScene(QGraphicsScene):
         self.render_progress = True
 
     def init_grid(self):
-        """ Initialise the grid display """
+        """ Initialise the grid display. """
         self.set_cell_dimension()
         width = self.columns * self.cell_dimension
         height = self.rows * self.cell_dimension
@@ -29,32 +29,41 @@ class MazeRunnerScene(QGraphicsScene):
 
         cells = self.runner.get_cells()
         for cell in cells:
-            lines = cell.get_wall_display()
+            lines = cell.get_lines()
             for line in lines:
-                cell.add_line_object(self.addLine(line, Config.CELL_WALL_PEN))
-            fill = cell.get_fill_display()
+                cell.add_line_item(self.addLine(line, Config.CELL_WALL_PEN))
+            fill = cell.get_fill_rect()
             if len(fill) > 0:
-                cell.set_rect_object(self.addRect(fill[0], fill[1], fill[2]))
+                cell.set_rect_item(self.addRect(fill[0], fill[1], fill[2]))
+
+    def start_search_on_click(self, search_option):
+        """ Prepare the solver to start a new search and start it. """
+        self.runner.set_running(False)
+        self.delete_grid()
+        self.runner.reset_search()
+        self.init_grid()
+        self.runner.set_running(True)
+        self.runner.start_search(search_option)
 
     def update_grid(self):
         """ For any cell which has been changed since the last update, delete its items and redraw it to its current
         state. """
         for cell in self.runner.cells:
             if cell.has_changed():
-                old_lines = cell.get_line_objects()
+                old_lines = cell.get_line_items()
                 for line in old_lines:
                     self.removeItem(line)
-                old_rect_display = cell.get_rect_object()
+                old_rect_display = cell.get_rect_item()
                 if old_rect_display is not None:
                     self.removeItem(old_rect_display)
 
-                new_rect_display = cell.get_fill_display()
+                new_rect_display = cell.get_fill_rect()
                 if len(new_rect_display) > 0:
-                    cell.set_rect_object(self.addRect(new_rect_display[0], new_rect_display[1], new_rect_display[2]))
-                cell.clear_line_objects()
-                new_lines = cell.get_wall_display()
+                    cell.set_rect_item(self.addRect(new_rect_display[0], new_rect_display[1], new_rect_display[2]))
+                cell.clear_line_items()
+                new_lines = cell.get_lines()
                 for line in new_lines:
-                    cell.add_line_object(self.addLine(line, Config.CELL_WALL_PEN))
+                    cell.add_line_item(self.addLine(line, Config.CELL_WALL_PEN))
                 cell.changed = False
 
     def add_rect(self, cell, pen, brush):
@@ -66,10 +75,10 @@ class MazeRunnerScene(QGraphicsScene):
     def delete_grid(self):
         """ Deletes all items. """
         for cell in self.runner.cells:
-            old_lines = cell.get_line_objects()
+            old_lines = cell.get_line_items()
             for line in old_lines:
                 self.removeItem(line)
-            old_rect_display = cell.get_rect_object()
+            old_rect_display = cell.get_rect_item()
             if old_rect_display is not None:
                 self.removeItem(old_rect_display)
         for line in self.path:
@@ -107,15 +116,6 @@ class MazeRunnerScene(QGraphicsScene):
         else:
             return False
 
-    def start_search_on_click(self, search_option):
-        """ Prepare the solver to start a new search and start it. """
-        self.runner.set_running(False)
-        self.delete_grid()
-        self.runner.reset_search()
-        self.init_grid()
-        self.runner.set_running(True)
-        self.runner.start_search(search_option)
-
     def get_columns(self):
         """ Returns the number of columns in the grid. """
         return self.columns
@@ -124,15 +124,15 @@ class MazeRunnerScene(QGraphicsScene):
         """ Returns the number of rows in the grid. """
         return self.rows
 
-    def get_cell_dimension(self):
-        """ Returns the side length of a cell in the grid. """
-        return self.cell_dimension
-
     def set_maze_dimensions(self, columns, rows):
         """ Sets the dimensions of the maze to the given columns and rows. """
         self.columns = columns
         self.rows = rows
         self.set_cell_dimension()
+
+    def get_cell_dimension(self):
+        """ Returns the side length of a cell in the grid. """
+        return self.cell_dimension
 
     def set_cell_dimension(self):
         """ Calculates an appropriate cell side length which allows the grid to be drawn on screen. This is not executed the

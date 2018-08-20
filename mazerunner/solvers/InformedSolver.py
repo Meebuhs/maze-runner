@@ -34,7 +34,7 @@ class InformedSolver:
                 break
             self.current_cell = self.queue.get()[1]
             self.current_cell.set_visited()
-            self.current_cell.set_queue(False)
+            self.current_cell.set_in_queue(False)
             if self.current_cell == self.goal_cell:
                 self.construct_path()
                 break
@@ -45,7 +45,7 @@ class InformedSolver:
                         cell.set_parent(self.current_cell)
                         # Cost to cell is ignored by greedy search
                         cell.set_cost(self.current_cell.get_cost() + 1)
-                        cell.set_queue()
+                        cell.set_in_queue()
             self.runner.display.update_scene()
 
     def recommence(self):

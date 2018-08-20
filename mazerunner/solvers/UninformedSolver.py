@@ -30,7 +30,7 @@ class UninformedSolver:
                 break
             self.current_cell = self.get_next_cell()
             self.current_cell.set_visited()
-            self.current_cell.set_queue(False)
+            self.current_cell.set_in_queue(False)
             if self.current_cell == self.goal_cell:
                 self.construct_path()
                 break
@@ -39,7 +39,7 @@ class UninformedSolver:
                     if cell.get_parent() is None:
                         self.queue.append(cell)
                         cell.set_parent(self.current_cell)
-                        cell.set_queue()
+                        cell.set_in_queue()
             self.runner.display.update_scene()
 
     def recommence(self):

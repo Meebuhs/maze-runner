@@ -21,69 +21,17 @@ class GeneratorCell:
         # Whether or not the cell has been visited
         self.visited = False
         # Whether the cell has been added to the queue, used for rendering
-        self.queue = False
+        self.in_queue = False
         # Whether it has been changed since last render
         self.changed = False
         # The cell walls
         self.lines = []
         self.generate_lines()
         # Store reference to line objects in order to remove them later
-        self.line_objects = []
-        self.rect_object = None
+        self.line_items = []
         # The cell fill rect, pen and brush
-        self.fill_display = []
-
-    def get_x(self):
-        """ Returns the cell's x coordinate """
-        return self.x
-
-    def get_y(self):
-        """ Returns the cell's y coordinate """
-        return self.y
-
-    def get_walls(self):
-        """ Returns the cell's walls """
-        return self.walls
-
-    def get_lines(self):
-        """ Returns the cell's walls """
-        self.generate_lines()
-        return self.lines
-
-    def get_visited(self):
-        """ Returns the cell's visited status """
-        return self.visited
-
-    def get_queue(self):
-        """ Returns the cell's queue status """
-        return self.queue
-
-    def has_changed(self):
-        """ Returns whether the cell has been changed since the last render. """
-        return self.changed
-
-    def get_wall_display(self):
-        self.generate_lines()
-        return self.lines
-
-    def get_fill_display(self):
-        self.generate_fill()
-        return self.fill_display
-
-    def clear_line_objects(self):
-        del self.line_objects[:]
-
-    def add_line_object(self, line):
-        self.line_objects.append(line)
-
-    def get_line_objects(self):
-        return self.line_objects
-
-    def set_rect_object(self, rect):
-        self.rect_object = rect
-
-    def get_rect_object(self):
-        return self.rect_object
+        self.fill_rect = []
+        self.rect_item = None
 
     def generate_lines(self):
         """ Populates the lines array with the cell walls defined by self.walls."""
@@ -111,38 +59,92 @@ class GeneratorCell:
 
     def generate_fill(self):
         """ Sets the fill rectangle, pen and brush based on the cell's state. """
-        del self.fill_display[:]
-        if self.get_queue():
+        del self.fill_rect[:]
+        if self.in_queue:
             # In queue
-            self.set_fill_display(Config.CELL_QUEUE_PEN, Config.CELL_QUEUE_BRUSH)
-        elif self.get_visited():
+            self.set_fill_rect(Config.CELL_QUEUE_PEN, Config.CELL_QUEUE_BRUSH)
+        elif self.visited:
             # Visited
-            self.set_fill_display(Config.CELL_VISITED_PEN, Config.CELL_VISITED_BRUSH)
+            self.set_fill_rect(Config.CELL_VISITED_PEN, Config.CELL_VISITED_BRUSH)
 
-    def set_fill_display(self, pen, brush):
+    def set_fill_rect(self, pen, brush):
         side_length = self.scene.get_cell_dimension()
         rect = QRectF(self.x * side_length + 1, self.y * side_length + 1, side_length - 1, side_length - 1)
-        self.fill_display = [rect, pen, brush]
+        self.fill_rect = [rect, pen, brush]
 
     def set_wall(self, wall, value):
-        """ Sets the render value for wall. Wall must be in {bottom, right} and value must be boolean """
+        """ Sets the render value for wall. Wall must be in {bottom, right} and value must be boolean. """
         self.changed = True
         self.walls[wall] = value
 
+    def get_x(self):
+        """ Returns the cell's x coordinate. """
+        return self.x
+
+    def get_y(self):
+        """ Returns the cell's y coordinate. """
+        return self.y
+
+    def get_walls(self):
+        """ Returns the cell's walls. """
+        return self.walls
+
+    def get_visited(self):
+        """ Returns the cell's visited status. """
+        return self.visited
+
     def set_visited(self, value=True):
-        """ Sets visited to value (default True) """
+        """ Sets visited to value (default True). """
         self.changed = True
         self.visited = value
 
-    def set_queue(self, value=True):
-        """ Sets queue status to value (default True) """
+    def set_in_queue(self, value=True):
+        """ Sets queue status to value (default True). """
         self.changed = True
-        self.queue = value
+        self.in_queue = value
+
+    def has_changed(self):
+        """ Returns whether the cell has been changed since the last render. """
+        return self.changed
+
+    def get_lines(self):
+        """ Returns the line's to render the cell's walls. """
+        self.generate_lines()
+        return self.lines
+
+    def get_line_items(self):
+        """ Returns the cell's stored QGraphicsLineItems. References to these items are used to remove the walls from
+        the scene. """
+        return self.line_items
+
+    def add_line_item(self, line):
+        """ Stores a QGraphicsLineItem. These are generated by QGraphicsScene.addLine and a reference must be stored in
+        order to remove it from the scene. """
+        self.line_items.append(line)
+
+    def clear_line_items(self):
+        """ Clears the stored QGraphicsLineItems. """
+        del self.line_items[:]
+
+    def get_fill_rect(self):
+        """ Returns a QRect which defines the cell's colour based on its current status. """
+        self.generate_fill()
+        return self.fill_rect
+
+    def get_rect_item(self):
+        """ Returns the stored QGraphicsRectItem. """
+        return self.rect_item
+
+    def set_rect_item(self, rect):
+        """ Sets the cell's QGraphicsRectItem which is generated by QGraphicsScene.addRect(). A reference to this item
+        must be stored to remove the item from the scene. """
+        self.rect_item = rect
 
     def __repr__(self):
+        """ Override the string representation. """
         return "({}, {})".format(self.x, self.y)
 
     def __lt__(self, other):
-        """ Override the less than comparator, this is used to fix priority queue breaking when two cells are the same
-        distance from the goal. """
+        """ Override the less than comparator with an arbitrary result, this is used to fix priority queue breaking
+        when two cells are the same distance from the goal. """
         return False
