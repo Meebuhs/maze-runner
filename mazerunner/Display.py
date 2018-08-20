@@ -105,7 +105,7 @@ class TabWidget(QWidget):
         self.columnsText = QLineEdit(self.generatorTab)
         self.columnsText.setGeometry(QRect(65, 10, 90, 30))
         self.columnsText.setValidator(QIntValidator(1, 99))
-        self.columnsText.setText(str(Config.GENERATOR_MAZE_COLUMNS))
+        self.columnsText.setText(str(Config.DEFAULT_MAZE_COLUMNS))
 
         self.rowsLabel = QLabel(self.generatorTab)
         self.rowsLabel.setText('Rows:')
@@ -113,7 +113,7 @@ class TabWidget(QWidget):
         self.rowsText = QLineEdit(self.generatorTab)
         self.rowsText.setGeometry(QRect(205, 10, 90, 30))
         self.rowsText.setValidator(QIntValidator(1, 99))
-        self.rowsText.setText(str(Config.GENERATOR_MAZE_ROWS))
+        self.rowsText.setText(str(Config.DEFAULT_MAZE_ROWS))
 
         self.startGenerationButton = QPushButton(self.generatorTab)
         self.startGenerationButton.setGeometry(QRect(305, 10, 90, 30))
@@ -168,7 +168,7 @@ class TabWidget(QWidget):
         self.runnerConsoleLabel.setText('')
         self.generatorConsoleLabel.setText('')
 
-    @pyqtSlot()
+    @pyqtSlot(name="runner_load_maze")
     def load_maze_on_click(self):
         """ Attempts to load a maze from file """
         if not self.runnerScene.load_maze_on_click():
@@ -177,7 +177,7 @@ class TabWidget(QWidget):
         else:
             self.maze_loaded = True
 
-    @pyqtSlot()
+    @pyqtSlot(name="runner_start_search")
     def start_search_on_click(self):
         """ If a maze is loaded, the selected search method will be used to find a solution to the maze """
         if self.maze_loaded:
@@ -186,28 +186,28 @@ class TabWidget(QWidget):
             self.runnerConsoleLabel.setText('Load a maze first')
             self.fade_label(self.runnerConsoleLabel)
 
-    @pyqtSlot()
+    @pyqtSlot(name="runner_pause")
     def toggle_pause_runner(self):
         """ Toggles the paused state of the runner. """
         if self.pauseSearchButton.isChecked():
-            Config.set_pause_runner()
+            self.runnerScene.runner.set_paused(True)
         else:
-            Config.set_pause_runner(False)
-            if not self.runnerScene.runner.get_solved():
+            self.runnerScene.runner.set_paused(False)
+            if not self.runnerScene.runner.get_solved() and self.runnerScene.runner.solver is not None:
                 self.runnerScene.runner.recommence()
 
-    @pyqtSlot()
+    @pyqtSlot(name="runner_render_progress")
     def toggle_render_runner(self):
         """ Toggles the render state of the runner. """
-        Config.set_render_runner(self.renderSearchButton.isChecked())
+        self.runnerScene.set_render_progress(self.renderSearchButton.isChecked())
 
-    @pyqtSlot()
+    @pyqtSlot(name="generator_start")
     def start_generation_on_click(self):
         """ Starts the generation of a maze of the size defined by the user """
-        Config.set_maze_dimensions(int(self.columnsText.text()), int(self.rowsText.text()), 'generator')
+        self.generatorScene.set_maze_dimensions(int(self.columnsText.text()), int(self.rowsText.text()))
         self.generatorScene.start_generation_on_click()
 
-    @pyqtSlot()
+    @pyqtSlot(name="generator_save_maze")
     def save_maze_on_click(self):
         """ Saves the generated maze """
         if self.generatorScene.generator.get_finished():
@@ -218,20 +218,20 @@ class TabWidget(QWidget):
             self.generatorConsoleLabel.setText('Generate a maze first')
             self.fade_label(self.generatorConsoleLabel)
 
-    @pyqtSlot()
+    @pyqtSlot(name="generator_pause")
     def toggle_pause_generator(self):
         """ Toggles the paused state of the generator. """
         if self.pauseGenerationButton.isChecked():
-            Config.set_pause_generator()
+            self.generatorScene.generator.set_paused(True)
         else:
-            Config.set_pause_generator(False)
+            self.generatorScene.generator.set_paused(False)
             if not self.generatorScene.generator.get_finished():
                 self.generatorScene.generator.recommence()
 
-    @pyqtSlot()
+    @pyqtSlot(name="generator_render_progress")
     def toggle_render_generator(self):
         """ Toggles the render state of the generator. """
-        Config.set_render_generator(self.renderGenerationButton.isChecked())
+        self.generatorScene.set_render_progress(self.renderGenerationButton.isChecked())
 
 
 def except_hook(cls, exception, traceback):

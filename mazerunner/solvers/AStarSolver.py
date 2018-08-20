@@ -1,6 +1,5 @@
 from math import sqrt
 
-import mazerunner.Config as Config
 from mazerunner.solvers.InformedSolver import InformedSolver
 
 
@@ -18,9 +17,9 @@ class AStarSolver(InformedSolver):
         """ Calculates the estimated distance from the start cell to the goal cell, via the given cell using euclidean
         distance for the heuristic h(c). """
         return cell.get_cost() + sqrt(
-            (Config.RUNNER_MAZE_COLUMNS - cell.get_x()) ** 2 + (Config.RUNNER_MAZE_ROWS - cell.get_y()) ** 2)
+            (self.runner.get_columns() - cell.get_x()) ** 2 + (self.runner.get_rows() - cell.get_y()) ** 2)
 
     def calculate_cost(self, cell):
         """ Calculates the estimated distance from the start cell to the goal cell, via the given cell using manhattan
         distance for the heuristic h(c). """
-        return cell.get_cost() + Config.RUNNER_MAZE_COLUMNS - cell.get_x() + Config.RUNNER_MAZE_ROWS - cell.get_y()
+        return cell.get_cost() + self.runner.get_columns() - cell.get_x() + self.runner.get_rows() - cell.get_y()

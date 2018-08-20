@@ -1,7 +1,6 @@
 from PyQt5.QtWidgets import QFileDialog
 
-import mazerunner.Config as Config
-from mazerunner.RunnerCell import RunnerCell, get_index
+from mazerunner.RunnerCell import RunnerCell
 from mazerunner.solvers.AStarSolver import AStarSolver
 from mazerunner.solvers.BFSSolver import BFSSolver
 from mazerunner.solvers.BiBFSSolver import BiBFSSolver
@@ -18,6 +17,8 @@ class MazeRunner:
         self.cells = []
         # Class instance of solver, is set in start_search
         self.solver = None
+        self.running = False
+        self.paused = False
         self.solved = False
 
     def start_search(self, search_option):
@@ -49,17 +50,17 @@ class MazeRunner:
         y = cell.get_y()
 
         # Above, check cell above's bottom wall
-        if y > 0 and not self.cells[get_index(x, y - 1)].get_walls().get('bottom'):
-            cells.append(self.cells[get_index(x, y - 1)])
+        if y > 0 and not self.cells[self.get_cell_index(x, y - 1)].get_walls().get('bottom'):
+            cells.append(self.cells[self.get_cell_index(x, y - 1)])
         # Right
-        if x < Config.RUNNER_MAZE_COLUMNS - 1 and not cell.get_walls().get('right'):
-            cells.append(self.cells[get_index(x + 1, y)])
+        if x < self.display.get_columns() - 1 and not cell.get_walls().get('right'):
+            cells.append(self.cells[self.get_cell_index(x + 1, y)])
         # Below
-        if y < Config.RUNNER_MAZE_ROWS - 1 and not cell.get_walls().get('bottom'):
-            cells.append(self.cells[get_index(x, y + 1)])
+        if y < self.display.get_rows() - 1 and not cell.get_walls().get('bottom'):
+            cells.append(self.cells[self.get_cell_index(x, y + 1)])
         # Left, check cell to the left's right wall
-        if x > 0 and not self.cells[get_index(x - 1, y)].get_walls().get('right'):
-            cells.append(self.cells[get_index(x - 1, y)])
+        if x > 0 and not self.cells[self.get_cell_index(x - 1, y)].get_walls().get('right'):
+            cells.append(self.cells[self.get_cell_index(x - 1, y)])
         return cells
 
     def load_maze(self):
@@ -80,12 +81,12 @@ class MazeRunner:
         with open(filename, 'r') as file:
             lines = file.readlines()
             columns, rows = [int(x) for x in lines[0].split()]
-            Config.set_maze_dimensions(columns, rows, 'runner')
+            self.display.set_maze_dimensions(columns, rows)
 
             x, y = 0, 0
             for line in lines[1:]:
                 line = line.strip()
-                cell = RunnerCell(x, y, int(line[0]), int(line[1]))
+                cell = RunnerCell(x, y, int(line[0]), int(line[1]), self)
                 self.cells.append(cell)
 
                 x = (x + 1) % columns
@@ -105,5 +106,37 @@ class MazeRunner:
         return self.cells
 
     def get_solved(self):
-        """ Returns the solved status for the runner """
+        """ Returns the solved status. """
         return self.solved
+
+    def get_running(self):
+        """ Returns the running status. """
+        return self.running
+
+    def get_paused(self):
+        """ Returns the paused status. """
+        return self.paused
+
+    def get_cell_index(self, x, y):
+        """ Returns the array index for the cell at position (x, y). """
+        return y * self.display.get_columns() + x
+
+    def set_running(self, value):
+        """ Sets the running flag to the given value. """
+        self.running = value
+
+    def set_paused(self, value):
+        """ Sets the paused flag to the given value. """
+        self.paused = value
+
+    def get_columns(self):
+        """ Returns the number of columns in the grid. """
+        return self.display.get_columns()
+
+    def get_rows(self):
+        """ Returns the number of rows in the grid. """
+        return self.display.get_rows()
+
+    def get_cell_dimension(self):
+        """ Returns the side length of a cell in the grid. """
+        return self.display.get_cell_dimension()

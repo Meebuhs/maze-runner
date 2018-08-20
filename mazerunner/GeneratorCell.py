@@ -8,10 +8,12 @@ class GeneratorCell:
     these are removed by the generation algorithm. Its x and y coordinates define where in the grid the cell resides.
     """
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, scene):
         # Coordinates of the cell
         self.x = x
         self.y = y
+        # The parent scene which contains this cell
+        self.scene = scene
         # Whether the cell walls should be rendered
         self.walls = {'bottom': True,
                       'right': True
@@ -83,15 +85,11 @@ class GeneratorCell:
     def get_rect_object(self):
         return self.rect_object
 
-    def get_side_length(self):
-        """ Returns the current side length. """
-        return Config.GENERATOR_CELL_DIMENSION
-
     def generate_lines(self):
         """ Populates the lines array with the cell walls defined by self.walls."""
         del self.lines[:]
 
-        side_length = self.get_side_length()
+        side_length = self.scene.get_cell_dimension()
         xc = self.x * side_length  # x position of top left corner
         yc = self.y * side_length  # y position of top left corner
 
@@ -122,7 +120,7 @@ class GeneratorCell:
             self.set_fill_display(Config.CELL_VISITED_PEN, Config.CELL_VISITED_BRUSH)
 
     def set_fill_display(self, pen, brush):
-        side_length = self.get_side_length()
+        side_length = self.scene.get_cell_dimension()
         rect = QRectF(self.x * side_length + 1, self.y * side_length + 1, side_length - 1, side_length - 1)
         self.fill_display = [rect, pen, brush]
 
@@ -148,8 +146,3 @@ class GeneratorCell:
         """ Override the less than comparator, this is used to fix priority queue breaking when two cells are the same
         distance from the goal. """
         return False
-
-
-def get_index(x, y):
-    """ Returns the array index for the cell at position (x, y) in the maze generator. """
-    return y * Config.GENERATOR_MAZE_COLUMNS + x

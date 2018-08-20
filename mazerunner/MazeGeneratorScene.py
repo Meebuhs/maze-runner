@@ -1,3 +1,5 @@
+from math import floor
+
 from PyQt5.QtCore import QCoreApplication, QRectF
 from PyQt5.QtWidgets import QGraphicsScene
 
@@ -10,13 +12,17 @@ class MazeGeneratorScene(QGraphicsScene):
 
     def __init__(self):
         super().__init__()
+        self.columns = Config.DEFAULT_MAZE_COLUMNS
+        self.rows = Config.DEFAULT_MAZE_ROWS
+        self.cell_dimension = Config.DEFAULT_CELL_DIMENSION
+        self.render_progress = True
         self.generator = MazeGenerator(self)
 
     def init_grid(self):
         """ Initialise the grid display """
         # Define the dimensions of the scene
-        width = Config.GENERATOR_MAZE_COLUMNS * Config.GENERATOR_CELL_DIMENSION
-        height = Config.GENERATOR_MAZE_ROWS * Config.GENERATOR_CELL_DIMENSION
+        width = self.columns * self.cell_dimension
+        height = self.rows * self.cell_dimension
         self.setSceneRect(0, Config.WINDOW_HEIGHT * Config.MAZE_WINDOW_VERTICAL_OFFSET_FACTOR, width, height)
         self.setItemIndexMethod(QGraphicsScene.NoIndex)
 
@@ -52,9 +58,8 @@ class MazeGeneratorScene(QGraphicsScene):
                 cell.changed = False
 
     def add_rect(self, cell, pen, brush):
-        rect = QRectF(cell.get_x() * Config.GENERATOR_CELL_DIMENSION + 1,
-                      cell.get_y() * Config.GENERATOR_CELL_DIMENSION + 1,
-                      Config.GENERATOR_CELL_DIMENSION - 1, Config.GENERATOR_CELL_DIMENSION - 1)
+        rect = QRectF(cell.get_x() * self.cell_dimension + 1, cell.get_y() * self.cell_dimension + 1,
+                      self.cell_dimension - 1, self.cell_dimension - 1)
         self.rects.append(self.addRect(rect, pen, brush))
 
     def set_visible(self, visible=True):
@@ -74,22 +79,52 @@ class MazeGeneratorScene(QGraphicsScene):
 
     def update_scene(self):
         """ If rendering is not suppressed or if the runner has finished, the display is updated. """
-        if Config.get_render_generator() or self.generator.get_finished():
+        if self.render_progress or self.generator.get_finished():
             self.update_grid()
             self.update()
             QCoreApplication.processEvents()
 
     def start_generation_on_click(self):
         """ Start maze generation """
-        Config.set_generator_running(False)
+        self.generator.set_running(False)
         self.delete_grid()
-        Config.set_generator_cell_dimension()
+        self.set_cell_dimension()
         self.generator = MazeGenerator(self)
         self.init_grid()
         self.update_scene()
-        Config.set_generator_running()
+        self.generator.set_running(True)
         self.generator.generate()
 
     def save_maze_on_click(self):
         """ Save the generated maze to a file """
         self.generator.save_maze()
+
+    def get_columns(self):
+        """ Returns the number of columns in the grid. """
+        return self.columns
+
+    def get_rows(self):
+        """ Returns the number of rows in the grid. """
+        return self.rows
+
+    def get_cell_dimension(self):
+        """ Returns the side length of a cell in the grid. """
+        return self.cell_dimension
+
+    def set_maze_dimensions(self, columns, rows):
+        """ Sets the dimensions of the maze to the given columns and rows. """
+        self.columns = columns
+        self.rows = rows
+        self.set_cell_dimension()
+
+    def set_cell_dimension(self):
+        """ Calculates an appropriate cell side length which allows the grid to be drawn on screen. This is not executed the
+        scene is currently processing. """
+        if not self.generator.get_running():
+            self.cell_dimension = min(
+                floor(Config.WINDOW_WIDTH * Config.MAZE_WINDOW_WIDTH_REDUCTION_FACTOR / self.columns),
+                floor(Config.WINDOW_HEIGHT * Config.MAZE_WINDOW_HEIGHT_REDUCTION_FACTOR / self.rows))
+
+    def set_render_progress(self, value):
+        """ Sets the render flag to the given value. """
+        self.render_progress = value

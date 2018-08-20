@@ -1,8 +1,7 @@
 from random import randint
 from time import time
 
-import mazerunner.Config as Config
-from mazerunner.GeneratorCell import GeneratorCell, get_index
+from mazerunner.GeneratorCell import GeneratorCell
 
 
 class MazeGenerator:
@@ -13,13 +12,31 @@ class MazeGenerator:
 
     def __init__(self, display):
         self.display = display
-        self.cells = create_cells(Config.GENERATOR_MAZE_COLUMNS, Config.GENERATOR_MAZE_ROWS)
+        self.cells = create_cells(self.display.get_columns(), self.display.get_rows(), self)
         self.current_cell = self.cells[0]
         self.current_cell.set_visited()
         # Set a cell as next, this is replaced with another cell before it is accessed
         self.next_cell = self.cells[1]
         self.visited_cells = []
+        self.running = False
+        self.paused = False
         self.finished = False
+
+    def set_running(self, value):
+        """ Sets the running flag to the given value. """
+        self.running = value
+
+    def get_running(self):
+        """ Returns the running status. """
+        return self.running
+
+    def set_paused(self, value):
+        """ Sets the paused flag to the given value. """
+        self.paused = value
+
+    def get_paused(self):
+        """ Returns the paused status. """
+        return self.paused
 
     def get_cells(self):
         """ Returns the cells """
@@ -29,10 +46,14 @@ class MazeGenerator:
         """ Returns whether the generator has finished """
         return self.finished
 
+    def get_cell_index(self, x, y):
+        """ Returns the array index for the cell at position (x, y). """
+        return y * self.display.get_columns() + x
+
     def generate(self):
         """ Start the depth first search algorithm to generate the maze """
         while True:
-            if Config.get_pause_generator():
+            if not self.running or self.paused:
                 break
             self.next_cell = self.select_neighbours(self.current_cell)
             if self.next_cell:
@@ -45,7 +66,7 @@ class MazeGenerator:
             elif len(self.visited_cells) > 0:
                 self.current_cell = self.visited_cells.pop()
             else:
-                Config.set_generator_running(False)
+                self.running = False
                 self.finished = True
                 self.display.update_scene()
                 break
@@ -75,13 +96,13 @@ class MazeGenerator:
         y = cell.get_y()
 
         if y > 0:  # Above
-            neighbours.append(self.cells[get_index(x, y - 1)])
-        if x < Config.GENERATOR_MAZE_COLUMNS - 1:  # Right
-            neighbours.append(self.cells[get_index(x + 1, y)])
-        if y < Config.GENERATOR_MAZE_ROWS - 1:  # Below
-            neighbours.append(self.cells[get_index(x, y + 1)])
+            neighbours.append(self.cells[self.get_cell_index(x, y - 1)])
+        if x < self.display.get_columns() - 1:  # Right
+            neighbours.append(self.cells[self.get_cell_index(x + 1, y)])
+        if y < self.display.get_rows() - 1:  # Below
+            neighbours.append(self.cells[self.get_cell_index(x, y + 1)])
         if x > 0:  # Right
-            neighbours.append(self.cells[get_index(x - 1, y)])
+            neighbours.append(self.cells[self.get_cell_index(x - 1, y)])
         return neighbours
 
     def save_maze(self):
@@ -90,11 +111,10 @@ class MazeGenerator:
         containing a 4 bit number. The lines are the cells in order where a 1 indicates a wall (ordered top right
         bottom left). In total the file will have columns x rows + 1 lines
         """
-        filename = ".\\mazes\\maze-{}x{}-{}.txt".format(Config.GENERATOR_MAZE_COLUMNS, Config.GENERATOR_MAZE_ROWS,
-                                                        time())
+        filename = ".\\mazes\\maze-{}x{}-{}.txt".format(self.display.get_columns(), self.display.get_rows(), time())
         with open(filename, 'w') as file:
             # Write the maze dimensions
-            file.write("{} {}".format(Config.GENERATOR_MAZE_COLUMNS, Config.GENERATOR_MAZE_ROWS))
+            file.write("{} {}".format(self.display.get_columns(), self.display.get_rows()))
             for cell in self.cells:
                 # Output string will be a two bit number, where a 1 represents a wall in that position.
                 # Ordered bottom, right.
@@ -107,15 +127,19 @@ class MazeGenerator:
                         output += str(0)
                 file.write("\n{}".format(output))
 
+    def get_cell_dimension(self):
+        """ Returns the side length of a cell in the grid. """
+        return self.display.get_cell_dimension()
 
-def create_cells(columns, rows):
+
+def create_cells(columns, rows, parent):
     """ Creates an array of cells of length columns x rows. The cell at position (x, y) (origin top left, increasing
      toward bottom right) appears in the array at index y * rows + x.
     """
     cells = []
     for y in range(rows):
         for x in range(columns):
-            cell = GeneratorCell(x, y)
+            cell = GeneratorCell(x, y, parent)
             cells.append(cell)
     return cells
 

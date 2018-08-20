@@ -1,5 +1,4 @@
-import mazerunner.Config as Config
-from mazerunner.RunnerCell import RunnerCell, get_index
+from mazerunner.RunnerCell import RunnerCell
 
 
 class UninformedSolver:
@@ -10,8 +9,8 @@ class UninformedSolver:
         self.path = []
         self.queue = []
         # Current and goal cells, the cells assigned here are discarded once search is commenced
-        self.current_cell = RunnerCell(0, 0, True, True)
-        self.goal_cell = RunnerCell(0, 0, True, True)
+        self.current_cell = RunnerCell(0, 0, True, True, self.runner)
+        self.goal_cell = RunnerCell(0, 0, True, True, self.runner)
 
     def start(self):
         """ Starts the solver."""
@@ -22,12 +21,12 @@ class UninformedSolver:
         """ Initialises the start and goal cells for the search. """
         self.queue.append(self.runner.cells[0])
         self.goal_cell = self.runner.cells[
-            get_index(Config.RUNNER_MAZE_COLUMNS - 1, Config.RUNNER_MAZE_ROWS - 1)]
+            self.runner.get_cell_index(self.runner.get_columns() - 1, self.runner.get_rows() - 1)]
 
     def run(self):
         """ Performs an uninformed search. The queue behaviour is defined by solvers which inherit from this one. """
         while True:
-            if not Config.get_runner_running() or Config.get_pause_runner():
+            if not self.runner.get_running() or self.runner.get_paused():
                 break
             self.current_cell = self.get_next_cell()
             self.current_cell.set_visited()
@@ -48,7 +47,7 @@ class UninformedSolver:
         self.run()
 
     def construct_path(self):
-        """ Constructs the solution path to the current cellby traversing the search tree which was constructed. """
+        """ Constructs the solution path to the current cell by traversing the search tree which was constructed. """
         cell = self.current_cell
         self.path.append(cell)
         while not cell == self.runner.cells[0]:

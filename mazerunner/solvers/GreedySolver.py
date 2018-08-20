@@ -1,4 +1,3 @@
-import mazerunner.Config as Config
 from mazerunner.solvers.InformedSolver import InformedSolver
 
 
@@ -13,4 +12,4 @@ class GreedySolver(InformedSolver):
 
     def calculate_cost(self, cell):
         """ Calculates the estimated distance from a cell to the goal cell using manhattan distance. """
-        return Config.RUNNER_MAZE_COLUMNS - cell.get_x() + Config.RUNNER_MAZE_ROWS - cell.get_y()
+        return self.runner.get_columns() - cell.get_x() + self.runner.get_rows() - cell.get_y()
