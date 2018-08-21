@@ -1,7 +1,7 @@
+import os
+from mazerunner.GeneratorCell import GeneratorCell
 from random import randint
 from time import time
-
-from mazerunner.GeneratorCell import GeneratorCell
 
 
 class MazeGenerator:
@@ -83,6 +83,9 @@ class MazeGenerator:
         containing a 4 bit number. The lines are the cells in order where a 1 indicates a wall (ordered top right
         bottom left). In total the file will have columns x rows + 1 lines
         """
+        path = os.path.join('.', 'mazes')
+        if not os.path.exists(path):
+            os.makedirs(path)
         filename = ".\\mazes\\maze-{}x{}-{}.txt".format(self.display.get_columns(), self.display.get_rows(), time())
         with open(filename, 'w') as file:
             # Write the maze dimensions
