@@ -1,12 +1,11 @@
+import mazerunner.Config as Config
+import os
 import sys
-
 from PyQt5.Qt import QIntValidator, QEasingCurve
 from PyQt5.QtCore import QRect, QTimer, pyqtSlot, QPropertyAnimation
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton, QWidget, QTabWidget, QVBoxLayout, \
     QGraphicsView, QLineEdit, QComboBox, QLabel, QGraphicsOpacityEffect
-
-import mazerunner.Config as Config
 from mazerunner.MazeGeneratorScene import MazeGeneratorScene
 from mazerunner.MazeRunnerScene import MazeRunnerScene
 
@@ -24,7 +23,7 @@ class App(QMainWindow):
         self.height = Config.WINDOW_HEIGHT
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
-        self.setWindowIcon(QIcon('..\\resources\\icon-512.png'))
+        self.setWindowIcon(QIcon(resource_path('resources\\icon-512.png')))
 
         # Set up tabs
         self.tab_widget = TabWidget(self)
@@ -240,6 +239,14 @@ def except_hook(cls, exception, traceback):
     """ Ensure pyqt doesn't eat exception tracebacks. """
     sys.__excepthook__(cls, exception, traceback)
 
+
+def resource_path(relative_path):
+    """ Returns the absolute path to a resource, works for dev and PyInstaller. """
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath('.')
+    return os.path.join(base_path, relative_path)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
