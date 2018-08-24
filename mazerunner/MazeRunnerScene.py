@@ -113,7 +113,7 @@ class MazeRunnerScene(QGraphicsScene):
         self.runner.reset_search()
         if self.runner.load_maze():
             self.init_grid()
-            self.runner.set_start_and_end()
+            self.runner.initialise_start_and_goal_cells()
             self.maze_loaded = True
         else:
             self.maze_loaded = False
@@ -149,6 +149,7 @@ class MazeRunnerScene(QGraphicsScene):
         self.render_progress = value
 
     def mousePressEvent(self, event):
+        """ Bind the mouse presses to start and goal cell selection. """
         if self.maze_loaded and not self.runner.running:
             x = event.scenePos().x()
             y = event.scenePos().y()
@@ -156,9 +157,10 @@ class MazeRunnerScene(QGraphicsScene):
                 if event.button() == Qt.LeftButton:
                     self.set_start_cell(x, y)
                 elif event.button() == Qt.RightButton:
-                    self.set_end_cell(x, y)
+                    self.set_goal_cell(x, y)
 
     def set_start_cell(self, x, y):
+        """ Sets the start cell for the search. """
         index = self.calculate_cell_index_from_coordinates(x, y)
         self.runner.start_cell.set_start(False)
         self.runner.start_cell = self.runner.cells[index]
@@ -168,17 +170,19 @@ class MazeRunnerScene(QGraphicsScene):
         self.update()
         QCoreApplication.processEvents()
 
-    def set_end_cell(self, x, y):
+    def set_goal_cell(self, x, y):
+        """ Sets the goal cell for the search. """
         index = self.calculate_cell_index_from_coordinates(x, y)
-        self.runner.end_cell.set_end(False)
-        self.runner.end_cell = self.runner.cells[index]
-        self.runner.end_cell.set_end(True)
+        self.runner.goal_cell.set_goal(False)
+        self.runner.goal_cell = self.runner.cells[index]
+        self.runner.goal_cell.set_goal(True)
 
         self.update_grid()
         self.update()
         QCoreApplication.processEvents()
 
     def calculate_cell_index_from_coordinates(self, x, y):
+        """ Returns the index of the cell which contains the point x, y. """
         cell_x = floor(x / self.cell_dimension)
         cell_y = floor(y / self.cell_dimension)
 

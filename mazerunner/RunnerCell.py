@@ -25,8 +25,8 @@ class RunnerCell(GeneratorCell):
         self.cost = 0
         # Generate start and goal cell fills
         self.start = True if x == 0 and y == 0 else False
-        self.end = True if x == self.scene.get_columns() - 1 and y == self.scene.get_rows() - 1 else False
-        if self.start or self.end:
+        self.goal = True if x == self.scene.get_columns() - 1 and y == self.scene.get_rows() - 1 else False
+        if self.start or self.goal:
             self.generate_fill()
 
     def generate_fill(self):
@@ -36,7 +36,7 @@ class RunnerCell(GeneratorCell):
             # Solution cell
             self.set_fill_rect(Config.CELL_END_PEN, Config.CELL_END_BRUSH)
             # If in the maze runner, start and goal cells are uniquely filled
-        elif self.end:
+        elif self.goal:
             # Goal cell
             self.set_fill_rect(Config.CELL_END_PEN, Config.CELL_END_BRUSH)
         elif self.start:
@@ -138,7 +138,7 @@ class RunnerCell(GeneratorCell):
         self.start = value
         self.changed = True
 
-    def set_end(self, value):
+    def set_goal(self, value):
         """ Sets this cell as the goal cell. """
-        self.end = value
+        self.goal = value
         self.changed = True
