@@ -22,7 +22,6 @@ class InformedSolver:
         """ Initialises the start and goal cells for the search. """
         self.queue.put((self.calculate_cost(self.current_cell), self.current_cell))
         self.current_cell.set_cost(0)
-        self.goal_cell = self.runner.goal_cell
 
     def run(self):
         """ Performs the informed search. The cost function f(c) is defined by inheriting solvers. """
@@ -57,10 +56,11 @@ class InformedSolver:
             cell.set_solution()
             self.path.append(cell.get_parent())
             cell = cell.get_parent()
-        self.runner.cells[0].set_solution()
+        self.runner.start_cell.set_solution()
         self.path.reverse()
         print(self.path)
         self.runner.solved = True
+        self.runner.running = False
         self.runner.display.update_scene(self.path)
 
     def get_path(self):

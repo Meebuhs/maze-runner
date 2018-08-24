@@ -1,6 +1,3 @@
-from mazerunner.RunnerCell import RunnerCell
-
-
 class UninformedSolver:
     """ Base class for solvers which perform a search without calculating any heuristic costs. """
 
@@ -8,9 +5,9 @@ class UninformedSolver:
         self.runner = runner
         self.path = []
         self.queue = []
-        # Current and goal cells, the cells assigned here are discarded once search is commenced
-        self.current_cell = RunnerCell(0, 0, True, True, self.runner)
-        self.goal_cell = RunnerCell(0, 0, True, True, self.runner)
+        # Current and goal cells
+        self.current_cell = self.runner.start_cell
+        self.goal_cell = self.runner.goal_cell
 
     def start(self):
         """ Starts the solver."""
@@ -19,9 +16,7 @@ class UninformedSolver:
 
     def initialise(self):
         """ Initialises the start and goal cells for the search. """
-        self.queue.append(self.runner.cells[0])
-        self.goal_cell = self.runner.cells[
-            self.runner.get_cell_index(self.runner.get_columns() - 1, self.runner.get_rows() - 1)]
+        self.queue.append(self.current_cell)
 
     def run(self):
         """ Performs an uninformed search. The queue behaviour is defined by solvers which inherit from this one. """
@@ -50,14 +45,15 @@ class UninformedSolver:
         """ Constructs the solution path to the current cell by traversing the search tree which was constructed. """
         cell = self.current_cell
         self.path.append(cell)
-        while not cell == self.runner.cells[0]:
+        while not cell == self.runner.start_cell:
             cell.set_solution()
             self.path.append(cell.get_parent())
             cell = cell.get_parent()
-        self.runner.cells[0].set_solution()
+        self.runner.start_cell.set_solution()
         self.path.reverse()
         print(self.path)
         self.runner.solved = True
+        self.runner.running = False
         self.runner.display.update_scene(self.path)
 
     def get_path(self):

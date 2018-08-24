@@ -35,7 +35,6 @@ class RunnerCell(GeneratorCell):
         if self.solution:
             # Solution cell
             self.set_fill_rect(Config.CELL_END_PEN, Config.CELL_END_BRUSH)
-            # If in the maze runner, start and goal cells are uniquely filled
         elif self.goal:
             # Goal cell
             self.set_fill_rect(Config.CELL_END_PEN, Config.CELL_END_BRUSH)

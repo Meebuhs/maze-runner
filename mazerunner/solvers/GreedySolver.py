@@ -12,4 +12,4 @@ class GreedySolver(InformedSolver):
 
     def calculate_cost(self, cell):
         """ Calculates the estimated distance from a cell to the goal cell using manhattan distance. """
-        return self.runner.get_columns() - cell.get_x() + self.runner.get_rows() - cell.get_y()
+        return self.runner.goal_cell.get_x() - cell.get_x() + self.runner.goal_cell.get_y() - cell.get_y()
