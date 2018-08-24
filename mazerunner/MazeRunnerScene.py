@@ -1,9 +1,8 @@
 from math import floor
 
+import mazerunner.Config as Config
 from PyQt5.QtCore import QRectF, QLineF, QCoreApplication
 from PyQt5.QtWidgets import QGraphicsScene
-
-import mazerunner.Config as Config
 from mazerunner.MazeRunner import MazeRunner
 
 
@@ -18,6 +17,7 @@ class MazeRunnerScene(QGraphicsScene):
         self.rows = Config.DEFAULT_MAZE_ROWS
         self.cell_dimension = Config.DEFAULT_CELL_DIMENSION
         self.render_progress = True
+        self.maze_loaded = False
 
     def init_grid(self):
         """ Initialise the grid display. """
@@ -112,9 +112,9 @@ class MazeRunnerScene(QGraphicsScene):
         self.runner.reset_search()
         if self.runner.load_maze():
             self.init_grid()
-            return True
+            self.maze_loaded = True
         else:
-            return False
+            self.maze_loaded = False
 
     def get_columns(self):
         """ Returns the number of columns in the grid. """

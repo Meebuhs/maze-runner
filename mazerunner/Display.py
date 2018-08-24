@@ -1,6 +1,7 @@
-import mazerunner.Config as Config
 import os
 import sys
+
+import mazerunner.Config as Config
 from PyQt5.Qt import QIntValidator, QEasingCurve
 from PyQt5.QtCore import QRect, QTimer, pyqtSlot, QPropertyAnimation
 from PyQt5.QtGui import QIcon
@@ -42,10 +43,6 @@ class TabWidget(QWidget):
 
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
-        # Set up process flow logic
-        self.maze_loaded = False
-        self.maze_generated = False
-
         # Instantiate a reference to an animation
         self.animation = None
 
@@ -174,13 +171,11 @@ class TabWidget(QWidget):
         if not self.runner_scene.load_maze_on_click():
             self.runner_console_label.setText('Maze not loaded.')
             self.fade_label(self.runner_console_label)
-        else:
-            self.maze_loaded = True
 
     @pyqtSlot(name="runner_start_search")
     def start_search_on_click(self):
         """ If a maze is loaded, the selected search method will be used to find a solution to the maze. """
-        if self.maze_loaded:
+        if self.runner_scene.maze_loaded:
             self.runner_scene.start_search_on_click(self.runner_search_combobox.currentText())
         else:
             self.runner_console_label.setText('Load a maze first')
