@@ -1,8 +1,9 @@
 from math import floor
 
-import mazerunner.Config as Config
-from PyQt5.QtCore import QRectF, QLineF, QCoreApplication
+from PyQt5.QtCore import QRectF, QLineF, QCoreApplication, Qt
 from PyQt5.QtWidgets import QGraphicsScene
+
+import mazerunner.Config as Config
 from mazerunner.MazeRunner import MazeRunner
 
 
@@ -112,6 +113,7 @@ class MazeRunnerScene(QGraphicsScene):
         self.runner.reset_search()
         if self.runner.load_maze():
             self.init_grid()
+            self.runner.set_start_and_end()
             self.maze_loaded = True
         else:
             self.maze_loaded = False
@@ -145,3 +147,39 @@ class MazeRunnerScene(QGraphicsScene):
     def set_render_progress(self, value):
         """ Sets the render flag to the given value. """
         self.render_progress = value
+
+    def mousePressEvent(self, event):
+        if self.maze_loaded and not self.runner.running:
+            x = event.scenePos().x()
+            y = event.scenePos().y()
+            if 0 <= x <= self.columns * self.cell_dimension and 0 <= y <= self.rows * self.cell_dimension:
+                if event.button() == Qt.LeftButton:
+                    self.set_start_cell(x, y)
+                elif event.button() == Qt.RightButton:
+                    self.set_end_cell(x, y)
+
+    def set_start_cell(self, x, y):
+        index = self.calculate_cell_index_from_coordinates(x, y)
+        self.runner.start_cell.set_start(False)
+        self.runner.start_cell = self.runner.cells[index]
+        self.runner.start_cell.set_start(True)
+
+        self.update_grid()
+        self.update()
+        QCoreApplication.processEvents()
+
+    def set_end_cell(self, x, y):
+        index = self.calculate_cell_index_from_coordinates(x, y)
+        self.runner.end_cell.set_end(False)
+        self.runner.end_cell = self.runner.cells[index]
+        self.runner.end_cell.set_end(True)
+
+        self.update_grid()
+        self.update()
+        QCoreApplication.processEvents()
+
+    def calculate_cell_index_from_coordinates(self, x, y):
+        cell_x = floor(x / self.cell_dimension)
+        cell_y = floor(y / self.cell_dimension)
+
+        return self.runner.get_cell_index(cell_x, cell_y)
