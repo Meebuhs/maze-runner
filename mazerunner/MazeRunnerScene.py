@@ -1,6 +1,6 @@
 from math import floor
 
-from PyQt5.QtCore import QRectF, QLineF, QCoreApplication
+from PyQt5.QtCore import QRectF, QLineF, QCoreApplication, Qt
 from PyQt5.QtWidgets import QGraphicsScene
 
 import mazerunner.Config as Config
@@ -18,6 +18,7 @@ class MazeRunnerScene(QGraphicsScene):
         self.rows = Config.DEFAULT_MAZE_ROWS
         self.cell_dimension = Config.DEFAULT_CELL_DIMENSION
         self.render_progress = True
+        self.maze_loaded = False
 
     def init_grid(self):
         """ Initialise the grid display. """
@@ -112,9 +113,10 @@ class MazeRunnerScene(QGraphicsScene):
         self.runner.reset_search()
         if self.runner.load_maze():
             self.init_grid()
-            return True
+            self.runner.initialise_start_and_goal_cells()
+            self.maze_loaded = True
         else:
-            return False
+            self.maze_loaded = False
 
     def get_columns(self):
         """ Returns the number of columns in the grid. """
@@ -145,3 +147,43 @@ class MazeRunnerScene(QGraphicsScene):
     def set_render_progress(self, value):
         """ Sets the render flag to the given value. """
         self.render_progress = value
+
+    def mousePressEvent(self, event):
+        """ Bind the mouse presses to start and goal cell selection. """
+        if self.maze_loaded and not self.runner.running:
+            x = event.scenePos().x()
+            y = event.scenePos().y()
+            if 0 <= x <= self.columns * self.cell_dimension and 0 <= y <= self.rows * self.cell_dimension:
+                if event.button() == Qt.LeftButton:
+                    self.set_start_cell(x, y)
+                elif event.button() == Qt.RightButton:
+                    self.set_goal_cell(x, y)
+
+    def set_start_cell(self, x, y):
+        """ Sets the start cell for the search. """
+        index = self.calculate_cell_index_from_coordinates(x, y)
+        self.runner.start_cell.set_start(False)
+        self.runner.start_cell = self.runner.cells[index]
+        self.runner.start_cell.set_start(True)
+
+        self.update_grid()
+        self.update()
+        QCoreApplication.processEvents()
+
+    def set_goal_cell(self, x, y):
+        """ Sets the goal cell for the search. """
+        index = self.calculate_cell_index_from_coordinates(x, y)
+        self.runner.goal_cell.set_goal(False)
+        self.runner.goal_cell = self.runner.cells[index]
+        self.runner.goal_cell.set_goal(True)
+
+        self.update_grid()
+        self.update()
+        QCoreApplication.processEvents()
+
+    def calculate_cell_index_from_coordinates(self, x, y):
+        """ Returns the index of the cell which contains the point x, y. """
+        cell_x = floor(x / self.cell_dimension)
+        cell_y = floor(y / self.cell_dimension)
+
+        return self.runner.get_cell_index(cell_x, cell_y)

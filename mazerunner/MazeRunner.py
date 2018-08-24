@@ -7,6 +7,7 @@ from mazerunner.solvers.BiBFSSolver import BiBFSSolver
 from mazerunner.solvers.BiDFSSolver import BiDFSSolver
 from mazerunner.solvers.DFSSolver import DFSSolver
 from mazerunner.solvers.GreedySolver import GreedySolver
+from mazerunner.solvers.RandomSampleSolver import RandomSampleSolver
 
 
 class MazeRunner:
@@ -20,6 +21,8 @@ class MazeRunner:
         self.running = False
         self.paused = False
         self.solved = False
+        self.start_cell = None
+        self.goal_cell = None
 
     def start_search(self, search_option):
         """ Calls the appropriate search function based on the search option. """
@@ -35,6 +38,8 @@ class MazeRunner:
             self.solver = GreedySolver(self)
         elif search_option == 'A*':
             self.solver = AStarSolver(self)
+        elif search_option == 'Random Sampling':
+            self.solver = RandomSampleSolver(self)
         self.solver.start()
 
     def reset_search(self):
@@ -100,6 +105,14 @@ class MazeRunner:
     def recommence(self):
         """ Recommence the solver. """
         self.solver.recommence()
+
+    def initialise_start_and_goal_cells(self):
+        """ Sets the start cell to be the upper leftmost cell, and the goal cell to be the lower rightmost. """
+        self.start_cell = self.cells[0]
+        self.start_cell.start = True
+        self.goal_cell = self.cells[
+            self.get_cell_index(self.get_columns() - 1, self.get_rows() - 1)]
+        self.goal_cell.end = True
 
     def get_cells(self):
         """ Returns the cells. """

@@ -1,7 +1,5 @@
 from queue import PriorityQueue
 
-from mazerunner.RunnerCell import RunnerCell
-
 
 class InformedSolver:
     """ Base class for an informed search. The fringe nodes are stored in a priority queue, sorted by an
@@ -11,9 +9,9 @@ class InformedSolver:
         self.runner = runner
         self.path = []
         self.queue = PriorityQueue(maxsize=0)
-        # Current and goal cells, the cells assigned here are discarded once search is commenced
-        self.current_cell = RunnerCell(0, 0, True, True, self.runner)
-        self.goal_cell = RunnerCell(0, 0, True, True, self.runner)
+        # Current and goal cells
+        self.current_cell = self.runner.start_cell
+        self.goal_cell = self.runner.goal_cell
 
     def start(self):
         """ Starts the solver."""
@@ -22,10 +20,8 @@ class InformedSolver:
 
     def initialise(self):
         """ Initialises the start and goal cells for the search. """
-        self.queue.put((self.calculate_cost(self.runner.cells[0]), self.runner.cells[0]))
-        self.runner.cells[0].set_cost(0)
-        self.goal_cell = self.runner.cells[
-            self.runner.get_cell_index(self.runner.get_columns() - 1, self.runner.get_rows() - 1)]
+        self.queue.put((self.calculate_cost(self.current_cell), self.current_cell))
+        self.current_cell.set_cost(0)
 
     def run(self):
         """ Performs the informed search. The cost function f(c) is defined by inheriting solvers. """
@@ -56,14 +52,15 @@ class InformedSolver:
         """ Constructs the solution path to the current cell by traversing the search tree which was constructed. """
         self.path.append(self.current_cell)
         cell = self.current_cell
-        while not cell == self.runner.cells[0]:
+        while not cell == self.runner.start_cell:
             cell.set_solution()
             self.path.append(cell.get_parent())
             cell = cell.get_parent()
-        self.runner.cells[0].set_solution()
+        self.runner.start_cell.set_solution()
         self.path.reverse()
         print(self.path)
         self.runner.solved = True
+        self.runner.running = False
         self.runner.display.update_scene(self.path)
 
     def get_path(self):

@@ -24,7 +24,9 @@ class RunnerCell(GeneratorCell):
         # The cost of reaching this cell from the start cell
         self.cost = 0
         # Generate start and goal cell fills
-        if (x == 0 and y == 0) or (x == self.scene.get_columns() - 1 and y == self.scene.get_rows() - 1):
+        self.start = True if x == 0 and y == 0 else False
+        self.goal = True if x == self.scene.get_columns() - 1 and y == self.scene.get_rows() - 1 else False
+        if self.start or self.goal:
             self.generate_fill()
 
     def generate_fill(self):
@@ -33,11 +35,10 @@ class RunnerCell(GeneratorCell):
         if self.solution:
             # Solution cell
             self.set_fill_rect(Config.CELL_END_PEN, Config.CELL_END_BRUSH)
-            # If in the maze runner, start and goal cells are uniquely filled
-        elif self.x == self.scene.get_columns() - 1 and self.y == self.scene.get_rows() - 1:
+        elif self.goal:
             # Goal cell
             self.set_fill_rect(Config.CELL_END_PEN, Config.CELL_END_BRUSH)
-        elif self.x == 0 and self.y == 0:
+        elif self.start:
             # Start cell
             self.set_fill_rect(Config.CELL_START_PEN, Config.CELL_START_BRUSH)
         elif self.in_queue:
@@ -130,3 +131,13 @@ class RunnerCell(GeneratorCell):
     def set_cost(self, cost):
         """ Sets the heuristic cost. """
         self.cost = cost
+
+    def set_start(self, value):
+        """ Sets this cell as the starting cell. """
+        self.start = value
+        self.changed = True
+
+    def set_goal(self, value):
+        """ Sets this cell as the goal cell. """
+        self.goal = value
+        self.changed = True

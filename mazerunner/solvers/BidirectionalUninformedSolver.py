@@ -1,6 +1,3 @@
-from mazerunner.RunnerCell import RunnerCell
-
-
 class BidirectionalUninformedSolver:
     """ Solver which implements a Bidirectional Uninformed Search. One search commences forward from the start cell
     and the other backwards from the goal. The search terminates when a cell has been visited by both the forward and
@@ -12,11 +9,10 @@ class BidirectionalUninformedSolver:
         self.f_queue = []
         self.b_queue = []
         # Current and goal cells for forward and backward searches
-        # The cells assigned here are discarded once search is commenced
-        self.f_current_cell = RunnerCell(0, 0, True, True, self.runner)
-        self.f_goal_cell = RunnerCell(0, 0, True, True, self.runner)
-        self.b_current_cell = RunnerCell(0, 0, True, True, self.runner)
-        self.b_goal_cell = RunnerCell(0, 0, True, True, self.runner)
+        self.f_current_cell = self.runner.start_cell
+        self.f_goal_cell = self.runner.goal_cell
+        self.b_current_cell = self.runner.goal_cell
+        self.b_goal_cell = self.runner.start_cell
 
     def start(self):
         """ Starts the solver."""
@@ -25,11 +21,8 @@ class BidirectionalUninformedSolver:
 
     def initialise(self):
         """ Initialises the start and goal cells for the search. """
-        self.f_queue.append(self.runner.cells[0])
-        self.b_queue.append(self.runner.cells[
-                                self.runner.get_cell_index(self.runner.get_columns() - 1, self.runner.get_rows() - 1)])
-        self.f_goal_cell = self.b_queue[0]
-        self.b_goal_cell = self.f_queue[0]
+        self.f_queue.append(self.f_current_cell)
+        self.b_queue.append(self.b_current_cell)
 
     def run(self):
         """ Performs the Bidirectional Uninformed Search. The queue behaviour is defined by inheriting solvers. """
@@ -97,6 +90,7 @@ class BidirectionalUninformedSolver:
         self.f_goal_cell.set_solution()
         print(self.path)
         self.runner.solved = True
+        self.runner.running = False
         self.runner.display.update_scene(self.path)
 
     def get_path(self):
