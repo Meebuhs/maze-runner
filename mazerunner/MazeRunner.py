@@ -74,14 +74,16 @@ class MazeRunner:
         containing a 4 bit number. The lines are the cells in order where a 1 indicates a wall (ordered top right
         bottom left). In total the file will have columns x rows + 1 lines
         """
-        self.display.delete_grid()
-        del self.cells[:]
         # Allow user to select filename
         dialog = QFileDialog()
         filename = dialog.getOpenFileName(dialog, "Load maze", '.\\mazes\\', '*.txt')[0]
         if not filename:
             # No filename chosen
             return False
+
+        self.display.delete_grid()
+        self.reset_search()
+        del self.cells[:]
 
         with open(filename, 'r') as file:
             lines = file.readlines()

@@ -109,14 +109,10 @@ class MazeRunnerScene(QGraphicsScene):
         """ Attempt to load a maze from a file and draw it on screen. Returns true if successfully loaded, false if not.
         """
         self.runner.running = False
-        self.delete_grid()
-        self.runner.reset_search()
         if self.runner.load_maze():
             self.init_grid()
             self.runner.initialise_start_and_goal_cells()
             self.maze_loaded = True
-        else:
-            self.maze_loaded = False
 
     def set_maze_dimensions(self, columns, rows):
         """ Sets the dimensions of the maze to the given columns and rows. """
