@@ -19,13 +19,13 @@ class GeneratorCell:
                       'right': True
                       }
         # Whether or not the cell has been visited
-        self.visited = False
+        self._visited = False
         # Whether the cell has been added to the queue, used for rendering
-        self.in_queue = False
+        self._in_queue = False
         # Whether it has been changed since last render
         self.changed = False
         # The cell walls
-        self.lines = []
+        self._lines = []
         self.generate_lines()
         # Store reference to line objects in order to remove them later
         self.line_items = []
@@ -35,9 +35,9 @@ class GeneratorCell:
 
     def generate_lines(self):
         """ Populates the lines array with the cell walls defined by self.walls."""
-        del self.lines[:]
+        del self._lines[:]
 
-        side_length = self.scene.get_cell_dimension()
+        side_length = self.scene.cell_dimension
         xc = self.x * side_length  # x position of top left corner
         yc = self.y * side_length  # y position of top left corner
 
@@ -49,73 +49,67 @@ class GeneratorCell:
         """
 
         if self.walls.get('bottom'):
-            self.lines.append(QLineF(xc, yc + side_length, xc + side_length, yc + side_length))  # Bottom
+            self._lines.append(QLineF(xc, yc + side_length, xc + side_length, yc + side_length))  # Bottom
         if self.walls.get('right'):
-            self.lines.append(QLineF(xc + side_length, yc, xc + side_length, yc + side_length))  # Right
+            self._lines.append(QLineF(xc + side_length, yc, xc + side_length, yc + side_length))  # Right
         if self.y == 0:
-            self.lines.append(QLineF(xc, yc, xc + side_length, yc))  # Top, only cells in the first row
+            self._lines.append(QLineF(xc, yc, xc + side_length, yc))  # Top, only cells in the first row
         if self.x == 0:
-            self.lines.append(QLineF(xc, yc, xc, yc + side_length))  # Left, only cells in the first column
+            self._lines.append(QLineF(xc, yc, xc, yc + side_length))  # Left, only cells in the first column
 
     def generate_fill(self):
         """ Sets the fill rectangle, pen and brush based on the cell's state. """
         del self.fill_rect[:]
-        if self.in_queue:
+        if self._in_queue:
             # In queue
             self.set_fill_rect(Config.CELL_QUEUE_PEN, Config.CELL_QUEUE_BRUSH)
-        elif self.visited:
+        elif self._visited:
             # Visited
             self.set_fill_rect(Config.CELL_VISITED_PEN, Config.CELL_VISITED_BRUSH)
 
+    def get_fill_rect(self):
+        """ Returns a QRect which defines the cell's colour based on its current status. """
+        self.generate_fill()
+        return self.fill_rect
+
     def set_fill_rect(self, pen, brush):
-        side_length = self.scene.get_cell_dimension()
+        """ Creates a rect to fill the cell with the given pen and brush and sets it as the fill_rect. """
+        side_length = self.scene.cell_dimension
         rect = QRectF(self.x * side_length + 1, self.y * side_length + 1, side_length - 1, side_length - 1)
         self.fill_rect = [rect, pen, brush]
 
     def set_wall(self, wall, value):
         """ Sets the render value for wall. Wall must be in {bottom, right} and value must be boolean. """
-        self.changed = True
         self.walls[wall] = value
-
-    def get_x(self):
-        """ Returns the cell's x coordinate. """
-        return self.x
-
-    def get_y(self):
-        """ Returns the cell's y coordinate. """
-        return self.y
-
-    def get_walls(self):
-        """ Returns the cell's walls. """
-        return self.walls
-
-    def get_visited(self):
-        """ Returns the cell's visited status. """
-        return self.visited
-
-    def set_visited(self, value=True):
-        """ Sets visited to value (default True). """
         self.changed = True
-        self.visited = value
 
-    def set_in_queue(self, value=True):
-        """ Sets queue status to value (default True). """
+    @property
+    def visited(self):
+        """ Returns the visited status of this cell. """
+        return self._visited
+
+    @visited.setter
+    def visited(self, value):
+        """ Sets the visited status to value. """
+        self._visited = value
         self.changed = True
-        self.in_queue = value
 
-    def has_changed(self):
-        """ Returns whether the cell has been changed since the last render. """
-        return self.changed
+    @property
+    def in_queue(self):
+        """ Returns the queue status of this cell. """
+        return self._in_queue
 
-    def get_lines(self):
+    @in_queue.setter
+    def in_queue(self, value):
+        """ Sets queue status to value. """
+        self._in_queue = value
+        self.changed = True
+
+    @property
+    def lines(self):
         """ Returns the line's to render the cell's walls. """
         self.generate_lines()
-        return self.lines
-
-    def get_line_items(self):
-        """ Returns the cell's stored QGraphicsLineItems. References to these items are used to remove the walls from
-        the scene. """
-        return self.line_items
+        return self._lines
 
     def add_line_item(self, line):
         """ Stores a QGraphicsLineItem. These are generated by QGraphicsScene.addLine and a reference must be stored in
@@ -125,20 +119,6 @@ class GeneratorCell:
     def clear_line_items(self):
         """ Clears the stored QGraphicsLineItems. """
         del self.line_items[:]
-
-    def get_fill_rect(self):
-        """ Returns a QRect which defines the cell's colour based on its current status. """
-        self.generate_fill()
-        return self.fill_rect
-
-    def get_rect_item(self):
-        """ Returns the stored QGraphicsRectItem. """
-        return self.rect_item
-
-    def set_rect_item(self, rect):
-        """ Sets the cell's QGraphicsRectItem which is generated by QGraphicsScene.addRect(). A reference to this item
-        must be stored to remove the item from the scene. """
-        self.rect_item = rect
 
     def __repr__(self):
         """ Override the string representation. """

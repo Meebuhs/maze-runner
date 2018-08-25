@@ -51,20 +51,20 @@ class MazeRunner:
     def get_neighbours(self, cell):
         """ Returns a list of cells which are adjacent to cell. """
         cells = []
-        x = cell.get_x()
-        y = cell.get_y()
+        x = cell.x
+        y = cell.y
 
         # Above, check cell above's bottom wall
-        if y > 0 and not self.cells[self.get_cell_index(x, y - 1)].get_walls().get('bottom'):
+        if y > 0 and not self.cells[self.get_cell_index(x, y - 1)].walls.get('bottom'):
             cells.append(self.cells[self.get_cell_index(x, y - 1)])
         # Right
-        if x < self.display.get_columns() - 1 and not cell.get_walls().get('right'):
+        if x < self.display.columns - 1 and not cell.walls.get('right'):
             cells.append(self.cells[self.get_cell_index(x + 1, y)])
         # Below
-        if y < self.display.get_rows() - 1 and not cell.get_walls().get('bottom'):
+        if y < self.display.rows - 1 and not cell.walls.get('bottom'):
             cells.append(self.cells[self.get_cell_index(x, y + 1)])
         # Left, check cell to the left's right wall
-        if x > 0 and not self.cells[self.get_cell_index(x - 1, y)].get_walls().get('right'):
+        if x > 0 and not self.cells[self.get_cell_index(x - 1, y)].walls.get('right'):
             cells.append(self.cells[self.get_cell_index(x - 1, y)])
         return cells
 
@@ -91,12 +91,12 @@ class MazeRunner:
             x, y = 0, 0
             for line in lines[1:]:
                 line = line.strip()
-                cell = RunnerCell(x, y, int(line[0]), int(line[1]), self)
+                cell = RunnerCell(x, y, int(line[0]), int(line[1]), self.display)
                 self.cells.append(cell)
 
                 x = (x + 1) % columns
                 if not x:
-                    y = (y + 1) % rows
+                    y = (y + 1)
 
         if len(self.cells) != columns * rows:
             return False
@@ -111,45 +111,9 @@ class MazeRunner:
         self.start_cell = self.cells[0]
         self.start_cell.start = True
         self.goal_cell = self.cells[
-            self.get_cell_index(self.get_columns() - 1, self.get_rows() - 1)]
+            self.get_cell_index(self.display.columns - 1, self.display.rows - 1)]
         self.goal_cell.end = True
-
-    def get_cells(self):
-        """ Returns the cells. """
-        return self.cells
-
-    def get_running(self):
-        """ Returns the running status. """
-        return self.running
-
-    def set_running(self, value):
-        """ Sets the running flag to the given value. """
-        self.running = value
-
-    def get_paused(self):
-        """ Returns the paused status. """
-        return self.paused
-
-    def set_paused(self, value):
-        """ Sets the paused flag to the given value. """
-        self.paused = value
-
-    def get_solved(self):
-        """ Returns the solved status. """
-        return self.solved
-
-    def get_columns(self):
-        """ Returns the number of columns in the grid. """
-        return self.display.get_columns()
-
-    def get_rows(self):
-        """ Returns the number of rows in the grid. """
-        return self.display.get_rows()
-
-    def get_cell_dimension(self):
-        """ Returns the side length of a cell in the grid. """
-        return self.display.get_cell_dimension()
 
     def get_cell_index(self, x, y):
         """ Returns the array index for the cell at position (x, y). """
-        return y * self.display.get_columns() + x
+        return y * self.display.columns + x

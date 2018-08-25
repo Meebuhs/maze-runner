@@ -1,7 +1,8 @@
 import os
-from mazerunner.GeneratorCell import GeneratorCell
 from random import randint
 from time import time
+
+from mazerunner.GeneratorCell import GeneratorCell
 
 
 class MazeGenerator:
@@ -12,9 +13,9 @@ class MazeGenerator:
 
     def __init__(self, display):
         self.display = display
-        self.cells = create_cells(self.display.get_columns(), self.display.get_rows(), self)
+        self.cells = create_cells(self.display.columns, self.display.rows, self.display)
         self.current_cell = self.cells[0]
-        self.current_cell.set_visited()
+        self.current_cell.visited = True
         # Set a cell as next, this is replaced with another cell before it is accessed
         self.next_cell = self.cells[1]
         self.visited_cells = []
@@ -30,8 +31,8 @@ class MazeGenerator:
             self.next_cell = self.select_neighbours(self.current_cell)
             if self.next_cell:
                 self.visited_cells.append(self.current_cell)
-                self.next_cell.set_visited()
-                self.next_cell.set_in_queue(False)
+                self.next_cell.visited = True
+                self.next_cell.in_queue = False
                 remove_walls(self.current_cell, self.next_cell)
                 self.current_cell = self.next_cell
                 self.display.update_scene()
@@ -53,9 +54,9 @@ class MazeGenerator:
         unvisited = []
         neighbours = self.get_neighbours(cell)
         for neighbour in neighbours:
-            if not neighbour.get_visited():
+            if not neighbour.visited:
                 unvisited.append(neighbour)
-                neighbour.set_in_queue()
+                neighbour.in_queue = True
         if len(unvisited) > 0:
             return unvisited[randint(0, len(unvisited) - 1)]
         else:
@@ -64,14 +65,14 @@ class MazeGenerator:
     def get_neighbours(self, cell):
         """ Returns all neighbouring cells of a cell in an array. """
         neighbours = []
-        x = cell.get_x()
-        y = cell.get_y()
+        x = cell.x
+        y = cell.y
 
         if y > 0:  # Above
             neighbours.append(self.cells[self.get_cell_index(x, y - 1)])
-        if x < self.display.get_columns() - 1:  # Right
+        if x < self.display.columns - 1:  # Right
             neighbours.append(self.cells[self.get_cell_index(x + 1, y)])
-        if y < self.display.get_rows() - 1:  # Below
+        if y < self.display.rows - 1:  # Below
             neighbours.append(self.cells[self.get_cell_index(x, y + 1)])
         if x > 0:  # Right
             neighbours.append(self.cells[self.get_cell_index(x - 1, y)])
@@ -86,10 +87,10 @@ class MazeGenerator:
         path = os.path.join('.', 'mazes')
         if not os.path.exists(path):
             os.makedirs(path)
-        filename = ".\\mazes\\maze-{}x{}-{}.txt".format(self.display.get_columns(), self.display.get_rows(), time())
+        filename = ".\\mazes\\maze-{}x{}-{}.txt".format(self.display.columns, self.display.rows, time())
         with open(filename, 'w') as file:
             # Write the maze dimensions
-            file.write("{} {}".format(self.display.get_columns(), self.display.get_rows()))
+            file.write("{} {}".format(self.display.columns, self.display.rows))
             for cell in self.cells:
                 # Output string will be a two bit number, where a 1 represents a wall in that position.
                 # Ordered bottom, right.
@@ -102,33 +103,9 @@ class MazeGenerator:
                         output += str(0)
                 file.write("\n{}".format(output))
 
-    def get_cells(self):
-        """ Returns the cells. """
-        return self.cells
-
-    def get_running(self):
-        """ Returns the running status. """
-        return self.running
-
-    def set_running(self, value):
-        """ Sets the running flag to the given value. """
-        self.running = value
-
-    def set_paused(self, value):
-        """ Sets the paused flag to the given value. """
-        self.paused = value
-
-    def get_finished(self):
-        """ Returns whether the generator has finished. """
-        return self.finished
-
     def get_cell_index(self, x, y):
         """ Returns the array index for the cell at position (x, y). """
-        return y * self.display.get_columns() + x
-
-    def get_cell_dimension(self):
-        """ Returns the side length of a cell in the grid. """
-        return self.display.get_cell_dimension()
+        return y * self.display.columns + x
 
 
 def create_cells(columns, rows, parent):
@@ -145,8 +122,8 @@ def create_cells(columns, rows, parent):
 
 def remove_walls(current_cell, next_cell):
     """ Determines the direction travelled and removes the walls between two given cells"""
-    dx = current_cell.get_x() - next_cell.get_x()
-    dy = current_cell.get_y() - next_cell.get_y()
+    dx = current_cell.x - next_cell.x
+    dy = current_cell.y - next_cell.y
 
     if dx == 1:  # Moved left, remove other cells right wall
         next_cell.set_wall('right', False)

@@ -27,18 +27,18 @@ class BidirectionalUninformedSolver:
     def run(self):
         """ Performs the Bidirectional Uninformed Search. The queue behaviour is defined by inheriting solvers. """
         while True:
-            if not self.runner.get_running() or self.runner.get_paused():
+            if not self.runner.running or self.runner.paused:
                 break
             self.f_current_cell = self.get_next_cell(self.f_queue)
             self.b_current_cell = self.get_next_cell(self.b_queue)
 
-            self.f_current_cell.set_f_visited()
-            self.f_current_cell.set_visited()
-            self.f_current_cell.set_in_queue(False)
+            self.f_current_cell.f_visited = True
+            self.f_current_cell.visited = True
+            self.f_current_cell.in_queue = False
 
-            self.b_current_cell.set_visited()
-            self.b_current_cell.set_b_visited()
-            self.b_current_cell.set_in_queue(False)
+            self.b_current_cell.b_visited = True
+            self.b_current_cell.visited = True
+            self.b_current_cell.in_queue = False
 
             # If the two paths have overlapped, break the loop
             if self.f_current_cell.both_visited():
@@ -49,16 +49,17 @@ class BidirectionalUninformedSolver:
                 break
             else:
                 for cell in self.runner.get_neighbours(self.f_current_cell):
-                    if cell.get_f_parent() is None:
+                    if cell.f_parent is None:
                         self.f_queue.append(cell)
-                        cell.set_f_parent(self.f_current_cell)
-                        cell.set_in_queue()
+                        cell.f_parent = self.f_current_cell
+                        cell.in_queue = True
 
                 for cell in self.runner.get_neighbours(self.b_current_cell):
-                    if cell.get_b_parent() is None:
+                    if cell.b_parent is None:
                         self.b_queue.append(cell)
-                        cell.set_b_parent(self.b_current_cell)
-                        cell.set_in_queue()
+                        cell.b_parent = self.b_current_cell
+                        cell.in_queue = True
+
             self.runner.display.update_scene()
 
     def recommence(self):
@@ -73,10 +74,10 @@ class BidirectionalUninformedSolver:
         # being constructed to avoid the added complexity of prepending.
         new_cell = cell
         while not new_cell == self.b_goal_cell:
-            new_cell.set_solution()
-            self.path.append(new_cell.get_f_parent())
-            new_cell = new_cell.get_f_parent()
-        self.b_goal_cell.set_solution()
+            new_cell.solution = True
+            self.path.append(new_cell.f_parent)
+            new_cell = new_cell.f_parent
+        self.b_goal_cell.solution = True
         self.path.reverse()
 
         # Next add the overlapping cell and iterate through backward parents toward the goal. By appending cells here
@@ -84,18 +85,14 @@ class BidirectionalUninformedSolver:
         new_cell = cell
         self.path.append(new_cell)
         while not new_cell == self.f_goal_cell:
-            new_cell.set_solution()
-            self.path.append(new_cell.get_b_parent())
-            new_cell = new_cell.get_b_parent()
-        self.f_goal_cell.set_solution()
+            new_cell.solution = True
+            self.path.append(new_cell.b_parent)
+            new_cell = new_cell.b_parent
+        self.f_goal_cell.solution = True
         print(self.path)
         self.runner.solved = True
         self.runner.running = False
         self.runner.display.update_scene(self.path)
-
-    def get_path(self):
-        """ Returns the solution path. If the solver has not yet been run, the path returned is an empty array. """
-        return self.path
 
     def get_next_cell(self, queue):
         """ Returns the next cell from the given queue, must be overridden by the class which inherits from this

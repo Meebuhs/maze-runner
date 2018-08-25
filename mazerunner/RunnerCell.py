@@ -13,35 +13,35 @@ class RunnerCell(GeneratorCell):
                       'right': right
                       }
         # Forward and backward variants of visited flag for bidirectional searches
-        self.f_visited = False
-        self.b_visited = False
+        self._f_visited = False
+        self._b_visited = False
         # The parent of the cell in a search tree
         self.parent = None
         self.f_parent = None
         self.b_parent = None
         # Whether the cell is part of the solution path, used for rendering
-        self.solution = False
+        self._solution = False
         # The cost of reaching this cell from the start cell
         self.cost = 0
         # Generate start and goal cell fills
-        self.start = True if x == 0 and y == 0 else False
-        self.goal = True if x == self.scene.get_columns() - 1 and y == self.scene.get_rows() - 1 else False
-        if self.start or self.goal:
+        self._start = True if x == 0 and y == 0 else False
+        self._goal = True if x == self.scene.columns - 1 and y == self.scene.rows - 1 else False
+        if self._start or self._goal:
             self.generate_fill()
 
     def generate_fill(self):
         """ Sets the fill rectangle, pen and brush based on the cell's state. """
         del self.fill_rect[:]
-        if self.solution:
+        if self._solution:
             # Solution cell
             self.set_fill_rect(Config.CELL_END_PEN, Config.CELL_END_BRUSH)
-        elif self.goal:
+        elif self._goal:
             # Goal cell
             self.set_fill_rect(Config.CELL_END_PEN, Config.CELL_END_BRUSH)
-        elif self.start:
+        elif self._start:
             # Start cell
             self.set_fill_rect(Config.CELL_START_PEN, Config.CELL_START_BRUSH)
-        elif self.in_queue:
+        elif self._in_queue:
             # In queue
             self.set_fill_rect(Config.CELL_QUEUE_PEN, Config.CELL_QUEUE_BRUSH)
         elif self.visited:
@@ -53,61 +53,41 @@ class RunnerCell(GeneratorCell):
         self.clear_visited()
         self.clear_parents()
         self.cost = 0
-        self.set_in_queue(False)
-        self.set_solution(False)
+        self._in_queue = False
+        self._solution = False
 
-    def get_f_visited(self):
-        """ Returns the cell's forward visited status. """
-        return self.f_visited
+    @property
+    def f_visited(self):
+        """ Returns the forward visited status of this cell. """
+        return self._f_visited
 
-    def set_f_visited(self, value=True):
-        """ Sets forward visited to value (default True). """
+    @f_visited.setter
+    def f_visited(self, value):
+        """ Sets forward visited to value. """
+        self._f_visited = value
         self.changed = True
-        self.f_visited = value
 
-    def get_b_visited(self):
-        """ Returns the cell's backward visited status. """
-        return self.b_visited
+    @property
+    def b_visited(self):
+        """ Returns the backward visited status of this cell. """
+        return self._b_visited
 
-    def set_b_visited(self, value=True):
-        """ Sets backward visited to value (default True). """
+    @b_visited.setter
+    def b_visited(self, value):
+        """ Sets backward visited to value. """
+        self._b_visited = value
         self.changed = True
-        self.b_visited = value
 
     def clear_visited(self):
         """ Set all visited status' to false. """
         self.changed = True
-        self.visited = False
-        self.f_visited = False
-        self.b_visited = False
-
-    def get_parent(self):
-        """ Returns the cell's parent cell. """
-        return self.parent
-
-    def set_parent(self, parent):
-        """ Sets the parent cell. """
-        self.parent = parent
-
-    def get_f_parent(self):
-        """ Returns the cell's forward parent cell. """
-        return self.f_parent
-
-    def set_f_parent(self, parent):
-        """ Sets the forward parent cell. """
-        self.f_parent = parent
-
-    def get_b_parent(self):
-        """ Returns the cell's backward parent cell. """
-        return self.b_parent
-
-    def set_b_parent(self, parent):
-        """ Sets the backward parent cell. """
-        self.b_parent = parent
+        self._visited = False
+        self._f_visited = False
+        self._b_visited = False
 
     def both_visited(self):
         """ Returns true if cell has been visited by both forward and backward search. """
-        return self.f_visited and self.b_visited
+        return self._f_visited and self._b_visited
 
     def clear_parents(self):
         """ Sets all parent cells to None. """
@@ -115,29 +95,35 @@ class RunnerCell(GeneratorCell):
         self.f_parent = None
         self.b_parent = None
 
-    def get_solution(self):
-        """ Returns the cell's solution status. """
-        return self.solution
+    @property
+    def solution(self):
+        """ Returns whether this cell is part of the solution. """
+        return self._solution
 
-    def set_solution(self, value=True):
-        """ Sets solution status to value (default True). """
+    @solution.setter
+    def solution(self, value):
+        """ Sets solution status to value. """
+        self._solution = value
         self.changed = True
-        self.solution = value
 
-    def get_cost(self):
-        """ Returns the heuristic cost. """
-        return self.cost
+    @property
+    def start(self):
+        """ Returns whether this cell is the starting cell. """
+        return self._start
 
-    def set_cost(self, cost):
-        """ Sets the heuristic cost. """
-        self.cost = cost
-
-    def set_start(self, value):
+    @start.setter
+    def start(self, value):
         """ Sets this cell as the starting cell. """
-        self.start = value
+        self._start = value
         self.changed = True
 
-    def set_goal(self, value):
+    @property
+    def goal(self):
+        """ Returns whether this cell is the goal cell. """
+        return self._goal
+
+    @goal.setter
+    def goal(self, value):
         """ Sets this cell as the goal cell. """
-        self.goal = value
+        self._goal = value
         self.changed = True

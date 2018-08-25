@@ -1,12 +1,13 @@
 import os
 import sys
 
-import mazerunner.Config as Config
 from PyQt5.Qt import QIntValidator, QEasingCurve
 from PyQt5.QtCore import QRect, QTimer, pyqtSlot, QPropertyAnimation
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton, QWidget, QTabWidget, QVBoxLayout, \
     QGraphicsView, QLineEdit, QComboBox, QLabel, QGraphicsOpacityEffect
+
+import mazerunner.Config as Config
 from mazerunner.MazeGeneratorScene import MazeGeneratorScene
 from mazerunner.MazeRunnerScene import MazeRunnerScene
 
@@ -168,7 +169,8 @@ class TabWidget(QWidget):
     @pyqtSlot(name="runner_load_maze")
     def load_maze_on_click(self):
         """ Attempts to load a maze from file. """
-        if not self.runner_scene.load_maze_on_click():
+        self.runner_scene.load_maze_on_click()
+        if not self.runner_scene.maze_loaded:
             self.runner_console_label.setText('Maze not loaded.')
             self.fade_label(self.runner_console_label)
 
@@ -185,28 +187,29 @@ class TabWidget(QWidget):
     def toggle_pause_runner(self):
         """ Toggles the paused state of the runner. """
         if self.runner_pause_button.isChecked():
-            self.runner_scene.runner.set_paused(True)
+            self.runner_scene.runner.paused = True
         else:
-            self.runner_scene.runner.set_paused(False)
-            if not self.runner_scene.runner.get_solved() and self.runner_scene.runner.solver is not None:
+            self.runner_scene.runner.paused = False
+            if not self.runner_scene.runner.solved and self.runner_scene.runner.solver is not None:
                 self.runner_scene.runner.recommence()
 
     @pyqtSlot(name="runner_render_progress")
     def toggle_render_runner(self):
         """ Toggles the render state of the runner. """
-        self.runner_scene.set_render_progress(self.runner_render_progress_button.isChecked())
+        self.runner_scene.render_progress = self.runner_render_progress_button.isChecked()
 
     @pyqtSlot(name="generator_start")
     def start_generation_on_click(self):
         """ Starts the generation of a maze of the size defined by the user. """
         self.generator_scene.set_maze_dimensions(int(self.generator_columns_line_edit.text()),
                                                  int(self.generator_rows_line_edit.text()))
-        self.generator_scene.start_generation_on_click()
+        self.generator_scene.start_generation_on_click(self.generator_pause_button.isChecked())
 
     @pyqtSlot(name="generator_save_maze")
     def save_maze_on_click(self):
         """ Saves the generated maze. """
-        if self.generator_scene.generator.get_finished():
+        print(self.generator_scene.generator.finished)
+        if self.generator_scene.generator.finished:
             self.generator_scene.save_maze_on_click()
             self.generator_console_label.setText('Maze saved')
             self.fade_label(self.generator_console_label)
@@ -218,16 +221,16 @@ class TabWidget(QWidget):
     def toggle_pause_generator(self):
         """ Toggles the paused state of the generator. """
         if self.generator_pause_button.isChecked():
-            self.generator_scene.generator.set_paused(True)
+            self.generator_scene.generator.paused = True
         else:
-            self.generator_scene.generator.set_paused(False)
-            if not self.generator_scene.generator.get_finished():
+            self.generator_scene.generator.paused = False
+            if not self.generator_scene.generator.finished:
                 self.generator_scene.generator.recommence()
 
     @pyqtSlot(name="generator_render_progress")
     def toggle_render_generator(self):
         """ Toggles the render state of the generator. """
-        self.generator_scene.set_render_progress(self.generator_render_progress_button.isChecked())
+        self.generator_scene.render_progress = self.generator_render_progress_button.isChecked()
 
 
 def except_hook(cls, exception, traceback):
@@ -239,9 +242,10 @@ def resource_path(relative_path):
     """ Returns the absolute path to a resource, works for dev and PyInstaller. """
     try:
         base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath('.')
+    except AttributeError:
+        base_path = os.path.abspath('..')
     return os.path.join(base_path, relative_path)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

@@ -21,20 +21,20 @@ class UninformedSolver:
     def run(self):
         """ Performs an uninformed search. The queue behaviour is defined by solvers which inherit from this one. """
         while True:
-            if not self.runner.get_running() or self.runner.get_paused():
+            if not self.runner.running or self.runner.paused:
                 break
             self.current_cell = self.get_next_cell()
-            self.current_cell.set_visited()
-            self.current_cell.set_in_queue(False)
+            self.current_cell.visited = True
+            self.current_cell.in_queue = False
             if self.current_cell == self.goal_cell:
                 self.construct_path()
                 break
             else:
                 for cell in self.runner.get_neighbours(self.current_cell):
-                    if cell.get_parent() is None:
+                    if cell.parent is None:
                         self.queue.append(cell)
-                        cell.set_parent(self.current_cell)
-                        cell.set_in_queue()
+                        cell.parent = self.current_cell
+                        cell.in_queue = True
             self.runner.display.update_scene()
 
     def recommence(self):
@@ -46,19 +46,15 @@ class UninformedSolver:
         cell = self.current_cell
         self.path.append(cell)
         while not cell == self.runner.start_cell:
-            cell.set_solution()
-            self.path.append(cell.get_parent())
-            cell = cell.get_parent()
-        self.runner.start_cell.set_solution()
+            cell.solution = True
+            self.path.append(cell.parent)
+            cell = cell.parent
+        self.runner.start_cell.solution = True
         self.path.reverse()
         print(self.path)
         self.runner.solved = True
         self.runner.running = False
         self.runner.display.update_scene(self.path)
-
-    def get_path(self):
-        """ Returns the solution path. If the solver has not yet been run, the path returned is an empty array. """
-        return self.path
 
     def get_next_cell(self):
         """ Returns the next cell to be visited, must be overridden. """
