@@ -1,6 +1,6 @@
 from PyQt5.QtCore import QLineF, QRectF
 
-import mazerunner.Config as Config
+import mazerunner.utils.Config as Config
 
 
 class GeneratorCell:

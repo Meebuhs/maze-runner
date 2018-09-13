@@ -3,7 +3,7 @@ from math import floor
 from PyQt5.QtCore import QRectF, QLineF, QCoreApplication, Qt
 from PyQt5.QtWidgets import QGraphicsScene
 
-import mazerunner.Config as Config
+import mazerunner.utils.Config as Config
 from mazerunner.MazeRunner import MazeRunner
 
 
@@ -30,12 +30,12 @@ class MazeRunnerScene(QGraphicsScene):
 
         cells = self.runner.cells
         for cell in cells:
-            lines = cell.lines
-            for line in lines:
-                cell.add_line_item(self.addLine(line, Config.CELL_WALL_PEN))
             fill = cell.get_fill_rect()
             if len(fill) > 0:
                 cell.rect_item = self.addRect(fill[0], fill[1], fill[2])
+            lines = cell.lines
+            for line in lines:
+                cell.add_line_item(self.addLine(line, Config.CELL_WALL_PEN))
 
     def start_search_on_click(self, search_option):
         """ Prepare the solver to start a new search and start it. """
@@ -100,14 +100,14 @@ class MazeRunnerScene(QGraphicsScene):
         it will also be drawn. """
         if self.render_progress or self.runner.solved:
             self.update_grid()
+
             if path is not None:
                 self.draw_path(path)
             self.update()
             QCoreApplication.processEvents()
 
     def load_maze_on_click(self):
-        """ Attempt to load a maze from a file and draw it on screen. Returns true if successfully loaded, false if not.
-        """
+        """ Attempt to load a maze from a file and draw it on screen. """
         self.runner.running = False
         if self.runner.load_maze():
             self.init_grid()
@@ -121,8 +121,8 @@ class MazeRunnerScene(QGraphicsScene):
         self.set_cell_dimension()
 
     def set_cell_dimension(self):
-        """ Calculates an appropriate cell side length which allows the grid to be drawn on screen. This is not executed the
-        scene is currently processing. """
+        """ Calculates an appropriate cell side length which allows the grid to be drawn on screen. This is not executed
+        if the scene is currently processing. """
         if not self.runner.running:
             self.cell_dimension = min(
                 floor(Config.WINDOW_WIDTH * Config.MAZE_WINDOW_WIDTH_REDUCTION_FACTOR / self.columns),
@@ -145,10 +145,7 @@ class MazeRunnerScene(QGraphicsScene):
         self.runner.start_cell.start = False
         self.runner.start_cell = self.runner.cells[index]
         self.runner.start_cell.start = True
-
-        self.update_grid()
-        self.update()
-        QCoreApplication.processEvents()
+        self.update_scene()
 
     def set_goal_cell(self, x, y):
         """ Sets the goal cell for the search. """
@@ -156,10 +153,7 @@ class MazeRunnerScene(QGraphicsScene):
         self.runner.goal_cell.goal = False
         self.runner.goal_cell = self.runner.cells[index]
         self.runner.goal_cell.goal = True
-
-        self.update_grid()
-        self.update()
-        QCoreApplication.processEvents()
+        self.update_scene()
 
     def calculate_cell_index_from_coordinates(self, x, y):
         """ Returns the index of the cell which contains the point x, y. """

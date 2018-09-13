@@ -1,4 +1,4 @@
-import mazerunner.Config as Config
+import mazerunner.utils.Config as Config
 from mazerunner.GeneratorCell import GeneratorCell
 
 

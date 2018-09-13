@@ -3,7 +3,7 @@ from math import floor
 from PyQt5.QtCore import QCoreApplication, QRectF
 from PyQt5.QtWidgets import QGraphicsScene
 
-import mazerunner.Config as Config
+import mazerunner.utils.Config as Config
 from mazerunner.MazeGenerator import MazeGenerator
 
 
@@ -48,7 +48,7 @@ class MazeGeneratorScene(QGraphicsScene):
         self.generator.generate()
 
     def update_scene(self):
-        """ If rendering is not suppressed or if the runner has finished, the display is updated. """
+        """ If rendering is not suppressed or if the generator has finished, the display is updated. """
         if self.render_progress or self.generator.finished:
             self.update_grid()
             self.update()

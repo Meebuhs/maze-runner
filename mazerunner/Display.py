@@ -7,7 +7,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton, QWidget, QTabWidget, QVBoxLayout, \
     QGraphicsView, QLineEdit, QComboBox, QLabel, QGraphicsOpacityEffect
 
-import mazerunner.Config as Config
+import mazerunner.utils.Config as Config
 from mazerunner.MazeGeneratorScene import MazeGeneratorScene
 from mazerunner.MazeRunnerScene import MazeRunnerScene
 
