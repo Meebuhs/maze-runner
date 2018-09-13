@@ -1,4 +1,4 @@
-from queue import PriorityQueue
+from mazerunner.utils.PriorityQueue import PriorityQueue
 
 
 class InformedSolver:
@@ -8,7 +8,7 @@ class InformedSolver:
     def __init__(self, runner):
         self.runner = runner
         self.path = []
-        self.queue = PriorityQueue(maxsize=0)
+        self.queue = PriorityQueue()
         # Current and goal cells
         self.current_cell = self.runner.start_cell
         self.goal_cell = self.runner.goal_cell

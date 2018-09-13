@@ -123,8 +123,3 @@ class GeneratorCell:
     def __repr__(self):
         """ Override the string representation. """
         return "({}, {})".format(self.x, self.y)
-
-    def __lt__(self, other):
-        """ Override the less than comparator with an arbitrary result, this is used to fix priority queue breaking
-        when two cells are the same distance from the goal. """
-        return False

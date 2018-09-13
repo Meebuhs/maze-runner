@@ -127,3 +127,25 @@ class RunnerCell(GeneratorCell):
         """ Sets this cell as the goal cell. """
         self._goal = value
         self.changed = True
+
+    def __lt__(self, other):
+        """ Override the less than comparator with an arbitrary result, this is used to fix priority queue breaking
+        when two cells are the same distance from the goal. """
+        return self.cost < other.cost
+
+    def __gt__(self, other):
+        return self.cost > other.cost
+
+    def __le__(self, other):
+        return self.cost <= other.cost
+
+    def __ge__(self, other):
+        return self.cost >= other.cost
+
+    def __cmp__(self, other):
+        if self.cost > other.cost:
+            return 1
+        elif self.cost < other.cost:
+            return -1
+        else:
+            return 0
