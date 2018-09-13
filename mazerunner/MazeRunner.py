@@ -75,7 +75,8 @@ class MazeRunner:
         """
         # Allow user to select filename
         dialog = QFileDialog()
-        filename = dialog.getOpenFileName(dialog, "Load maze", '.\\mazes\\', '*.txt')[0]
+        path = Path('./mazes')
+        filename = dialog.getOpenFileName(dialog, "Load maze", str(path.resolve()), '*.txt')[0]
         if not filename:
             # No filename chosen
             return False
