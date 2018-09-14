@@ -67,7 +67,7 @@ class TabWidget(QWidget):
         self.runner_search_combobox.setGeometry(110, 11, 200, 28)
         # New solvers need to be added to this list and added to start_search in maze-runner/MazeRunner.py
         search_options = ['Breadth First Search', 'Bidirectional BFS', 'Depth First Search', 'Bidirectional DFS',
-                          'Greedy Best First', 'A*']
+                          'Greedy Best First', 'A*', 'Random Sampling']
         self.runner_search_combobox.addItems(search_options)
 
         self.runner_start_button = QPushButton(self.runner_tab)
