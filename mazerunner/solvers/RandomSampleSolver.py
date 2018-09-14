@@ -14,7 +14,7 @@ class RandomSampleSolver:
 
     def __init__(self, runner):
         self.runner = runner
-        self.max_nodes = 25
+        self.max_nodes = 1000
         self.max_distance = 1000
         # Current and goal cells, the cells assigned here are discarded once search is commenced
         self.id_counter = 0
@@ -33,6 +33,19 @@ class RandomSampleSolver:
         self.adjacency_list = []
         self.queue = PriorityQueue()
 
+    def test_points(self):
+        first_x = 100
+        first_y = 100
+        second_x = 300
+        second_y = 100
+        node_1 = SampleGraphNode(first_x, first_y, 0)
+        node_2 = SampleGraphNode(second_x, second_y, 1)
+        self.runner.display.addEllipse(node_1.x, node_1.y, 5, 5, Config.CELL_QUEUE_PEN, Config.CELL_QUEUE_BRUSH)
+        self.runner.display.addEllipse(node_2.x, node_2.y, 5, 5, Config.CELL_QUEUE_PEN, Config.CELL_QUEUE_BRUSH)
+        if not self.has_path_collision(node_1, node_2):
+            self.runner.display.addLine(node_1.x, node_1.y, node_2.x, node_2.y, Config.CELL_QUEUE_PEN)
+        self.runner.display.update()
+
     def create_node(self, x, y):
         """ Creates a new sample node. """
         node = SampleGraphNode(x, y, self.id_counter)
@@ -41,6 +54,7 @@ class RandomSampleSolver:
 
     def start(self):
         """ Starts the solver. """
+        # self.test_points()
         self.initialize()
         self.run()
 
@@ -60,8 +74,8 @@ class RandomSampleSolver:
     def sample(self):
         cell_dimension = self.runner.display.cell_dimension
         while len(self.nodes) < self.max_nodes:
-            x = randint(0, self.runner.display.columns * cell_dimension)
-            y = randint(0, self.runner.display.rows * cell_dimension)
+            x = randint(0, self.runner.display.columns * cell_dimension - 5)
+            y = randint(0, self.runner.display.rows * cell_dimension - 5)
             if not abs(x % cell_dimension) < 2 or not abs(y % cell_dimension) < 2:
                 self.nodes.append(self.create_node(x, y))
                 self.runner.display.addEllipse(x, y, 5, 5, Config.CELL_QUEUE_PEN, Config.CELL_QUEUE_BRUSH)
@@ -80,75 +94,70 @@ class RandomSampleSolver:
 
     def has_path_collision(self, node, other_node):
         cell_dimension = self.runner.display.cell_dimension
+        cells_to_check = self.get_cells_to_check(node, other_node)
+        for cell in cells_to_check:
+            if cell.walls['bottom']:
+                wall_x1 = cell.x * cell_dimension
+                wall_x2 = (cell.x + 1) * cell_dimension
+                wall_y1 = (cell.y + 1) * cell_dimension
+                wall_y2 = (cell.y + 1) * cell_dimension
+                if intersect((node.x, node.y), (other_node.x, other_node.y), (wall_x1, wall_y1),
+                             (wall_x2, wall_y2)):
+                    return True
+            if cell.walls['right']:
+                wall_x1 = (cell.x + 1) * cell_dimension
+                wall_x2 = (cell.x + 1) * cell_dimension
+                wall_y1 = cell.y * cell_dimension
+                wall_y2 = (cell.y + 1) * cell_dimension
+                if intersect((node.x, node.y), (other_node.x, other_node.y), (wall_x1, wall_y1),
+                             (wall_x2, wall_y2)):
+                    return True
+            if cell.y > 0:
+                cell_above = self.runner.cells[self.runner.get_cell_index(cell.x, cell.y - 1)]
+                if cell_above.walls['bottom']:
+                    wall_x1 = cell_above.x * cell_dimension
+                    wall_x2 = (cell_above.x + 1) * cell_dimension
+                    wall_y1 = (cell_above.y + 1) * cell_dimension
+                    wall_y2 = (cell_above.y + 1) * cell_dimension
+                    if intersect((node.x, node.y), (other_node.x, other_node.y), (wall_x1, wall_y1),
+                                 (wall_x2, wall_y2)):
+                        return True
+            if cell.x > 0:
+                cell_to_left = self.runner.cells[self.runner.get_cell_index(cell.x - 1, cell.y)]
+                if cell_to_left.walls['right']:
+                    wall_x1 = (cell_to_left.x + 1) * cell_dimension
+                    wall_x2 = (cell_to_left.x + 1) * cell_dimension
+                    wall_y1 = cell_to_left.y * cell_dimension
+                    wall_y2 = (cell_to_left.y + 1) * cell_dimension
+                    if intersect((node.x, node.y), (other_node.x, other_node.y), (wall_x1, wall_y1),
+                                 (wall_x2, wall_y2)):
+                        return True
+        return False
+
+    def get_cells_to_check(self, node, other_node):
+        """ Returns a list of cells to check for collisions.
+
+        Consider a path from cell (0,0) to (2, 3), the list of cells returned will those in the range (0-2, 0-3). The
+        same list of cells would be returned for a path from (2, 3) to (0, 0)"""
+        cell_dimension = self.runner.display.cell_dimension
         path_x1 = int(floor(node.x / cell_dimension))
         path_y1 = int(floor(node.y / cell_dimension))
         path_x2 = int(floor(other_node.x / cell_dimension))
         path_y2 = int(floor(other_node.y / cell_dimension))
         x_range = path_x2 - path_x1
         y_range = path_y2 - path_y1
+        start_x = path_x1 if x_range >= 0 else path_x2
+        start_y = path_y1 if y_range >= 0 else path_y2
 
-        print(path_x1, path_y1, path_x2, path_y2, x_range, y_range)
+        # print(path_x1, path_y1, path_x2, path_y2, x_range, y_range)
+        cells = []
+        for x_offset in range(abs(x_range) + 1):
+            for y_offset in range(abs(y_range) + 1):
+                # print(start_x, x_offset, start_y, y_offset)
+                cells.append(self.runner.cells[self.runner.get_cell_index(start_x + x_offset, start_y + y_offset)])
 
-        for x_offset in range(min(0, x_range), max(0, x_range)):
-            for y_offset in range(min(0, y_range), max(0, y_range)):
-                print(path_x1 + x_offset, path_y1 + y_offset)
-                cell = self.runner.cells[self.runner.get_cell_index(path_x1 + x_offset, path_y1 + y_offset)]
-                if cell.walls['bottom']:
-                    wall_x1 = cell.x * cell_dimension
-                    wall_x2 = (cell.x + 1) * cell_dimension
-                    wall_y1 = (cell.y + 1) * cell_dimension
-                    wall_y2 = (cell.y + 1) * cell_dimension
-                    print("bottom", path_x1, path_y1, path_x2, path_y2, x_offset, y_offset, (node.x, node.y),
-                          (other_node.x, other_node.y), (wall_x1, wall_y1), (wall_x2, wall_y2),
-                          intersect((node.x, node.y), (other_node.x, other_node.y), (wall_x1, wall_y1),
-                                    (wall_x2, wall_y2)))
-                    if intersect((node.x, node.y), (other_node.x, other_node.y), (wall_x1, wall_y1),
-                                 (wall_x2, wall_y2)):
-                        return True
-                if cell.walls['right']:
-                    wall_x1 = (cell.x + 1) * cell_dimension
-                    wall_x2 = (cell.x + 1) * cell_dimension
-                    wall_y1 = cell.y * cell_dimension
-                    wall_y2 = (cell.y + 1) * cell_dimension
-                    print("right", path_x1, path_y1, path_x2, path_y2, x_offset, y_offset, (node.x, node.y),
-                          (other_node.x, other_node.y), (wall_x1, wall_y1), (wall_x2, wall_y2),
-                          intersect((node.x, node.y), (other_node.x, other_node.y), (wall_x1, wall_y1),
-                                    (wall_x2, wall_y2)))
-                    if intersect((node.x, node.y), (other_node.x, other_node.y), (wall_x1, wall_y1),
-                                 (wall_x2, wall_y2)):
-                        return True
-                if path_y1 + y_offset > 0:
-                    cell_above = self.runner.cells[
-                        self.runner.get_cell_index(path_x1 + x_offset, path_y1 + y_offset - 1)]
-                    if cell_above.walls['bottom']:
-                        wall_x1 = cell_above.x * cell_dimension
-                        wall_x2 = (cell_above.x + 1) * cell_dimension
-                        wall_y1 = (cell_above.y + 1) * cell_dimension
-                        wall_y2 = (cell_above.y + 1) * cell_dimension
-                        print("above", path_x1, path_y1, path_x2, path_y2, x_offset, y_offset, (node.x, node.y),
-                              (other_node.x, other_node.y), (wall_x1, wall_y1), (wall_x2, wall_y2),
-                              intersect((node.x, node.y), (other_node.x, other_node.y), (wall_x1, wall_y1),
-                                        (wall_x2, wall_y2)))
-                        if intersect((node.x, node.y), (other_node.x, other_node.y), (wall_x1, wall_y1),
-                                     (wall_x2, wall_y2)):
-                            return True
-                if path_x1 + x_offset > 0:
-                    cell_to_left = self.runner.cells[
-                        self.runner.get_cell_index(path_x1 + x_offset - 1, path_y1 + y_offset)]
-                    if cell_to_left.walls['right']:
-                        wall_x1 = (cell_to_left.x + 1) * cell_dimension
-                        wall_x2 = (cell_to_left.x + 1) * cell_dimension
-                        wall_y1 = cell_to_left.y * cell_dimension
-                        wall_y2 = (cell_to_left.y + 1) * cell_dimension
-                        print("left", path_x1, path_y1, path_x2, path_y2, x_offset, y_offset, (node.x, node.y),
-                              (other_node.x, other_node.y), (wall_x1, wall_y1), (wall_x2, wall_y2),
-                              intersect((node.x, node.y), (other_node.x, other_node.y), (wall_x1, wall_y1),
-                                        (wall_x2, wall_y2)))
-                        if intersect((node.x, node.y), (other_node.x, other_node.y), (wall_x1, wall_y1),
-                                     (wall_x2, wall_y2)):
-                            return True
-        print("make path")
-        return False
+        # print(cells)
+        return cells
 
     def dijkstras_search(self):
         """ Performs dijkstra's algorithm on the graph to find an optimal path. """
@@ -164,7 +173,14 @@ class RandomSampleSolver:
                     if self.queue.contains(node):
                         self.queue.delete(node)
                     self.queue.put(node)
+        self.construct_path()
 
+    def recommence(self):
+        """ Recommences the solver. """
+        self.run()
+
+    def construct_path(self):
+        """ Constructs a path from the results of the search. """
         path = []
         try:
             node = self.goal_node
@@ -181,13 +197,6 @@ class RandomSampleSolver:
             self.runner.display.addLine(node.x, node.y, node2.x, node2.y, Config.CELL_QUEUE_PEN)
         self.runner.display.update()
         QCoreApplication.processEvents()
-
-    def recommence(self):
-        """ Recommences the solver. """
-        self.run()
-
-    def construct_path(self):
-        """ Constructs a path from the results of the search. """
 
     def test_collisions(self):
         """ Tests a range of line segment intersections to determine if the collision detection is working as intended.

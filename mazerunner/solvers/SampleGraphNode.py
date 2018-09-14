@@ -11,7 +11,7 @@ class SampleGraphNode:
 
     def distance_to(self, node):
         """ Returns the distance to the given node. """
-        return sqrt(abs(self.x - node.x) ** 2 + abs(self.y - node.y) ** 2)
+        return sqrt((self.x - node.x) ** 2 + (self.y - node.y) ** 2)
 
     def __repr__(self):
         return "id:{}-({}, {})".format(self.id, self.x, self.y)
