@@ -1,6 +1,6 @@
 from math import floor
 
-from PyQt5.QtCore import QRectF, QLineF, QCoreApplication, Qt
+from PyQt5.QtCore import QLineF, QCoreApplication, Qt
 from PyQt5.QtWidgets import QGraphicsScene
 
 import mazerunner.utils.Config as Config
@@ -85,6 +85,8 @@ class MazeRunnerScene(QGraphicsScene):
         for line in self.path:
             self.removeItem(line)
         del self.path[:]
+        if self.runner.solver and hasattr(self.runner.solver, "clear_display_items"):
+            self.runner.solver.clear_display_items()
 
     def draw_path(self, path):
         """ Draws a line connecting each of the cells in the given path. """

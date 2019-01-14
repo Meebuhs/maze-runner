@@ -15,6 +15,7 @@ DEFAULT_CELL_DIMENSION = 50
 
 # Pens for drawing cell walls
 CELL_WALL_PEN = QPen(QColor(0, 0, 0), 1)
+CELL_PATH_PEN = QPen(QColor(41, 182, 246), 2)
 CELL_VISITED_PEN = QPen(QColor(128, 222, 234), 1)
 CELL_QUEUE_PEN = QPen(QColor(41, 182, 246), 1)
 CELL_CURRENT_PEN = QPen(QColor(25, 118, 210), 1)
