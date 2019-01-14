@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from PyQt5.QtWidgets import QFileDialog
 
 from mazerunner.RunnerCell import RunnerCell
@@ -7,7 +9,6 @@ from mazerunner.solvers.BiBFSSolver import BiBFSSolver
 from mazerunner.solvers.BiDFSSolver import BiDFSSolver
 from mazerunner.solvers.DFSSolver import DFSSolver
 from mazerunner.solvers.GreedySolver import GreedySolver
-from mazerunner.solvers.RandomSampleSolver import RandomSampleSolver
 
 
 class MazeRunner:
@@ -38,8 +39,6 @@ class MazeRunner:
             self.solver = GreedySolver(self)
         elif search_option == 'A*':
             self.solver = AStarSolver(self)
-        elif search_option == 'Random Sampling':
-            self.solver = RandomSampleSolver(self)
         self.solver.start()
 
     def reset_search(self):
@@ -76,7 +75,8 @@ class MazeRunner:
         """
         # Allow user to select filename
         dialog = QFileDialog()
-        filename = dialog.getOpenFileName(dialog, "Load maze", '.\\mazes\\', '*.txt')[0]
+        path = Path('./mazes')
+        filename = dialog.getOpenFileName(dialog, "Load maze", str(path.resolve()), '*.txt')[0]
         if not filename:
             # No filename chosen
             return False

@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 from random import randint
 from time import time
 
@@ -84,11 +84,12 @@ class MazeGenerator:
         containing a 4 bit number. The lines are the cells in order where a 1 indicates a wall (ordered top right
         bottom left). In total the file will have columns x rows + 1 lines
         """
-        path = os.path.join('.', 'mazes')
-        if not os.path.exists(path):
-            os.makedirs(path)
-        filename = ".\\mazes\\maze-{}x{}-{}.txt".format(self.display.columns, self.display.rows, time())
-        with open(filename, 'w') as file:
+        path = Path('./mazes')
+        if not path.exists():
+            path.mkdir(parents=True)
+        filename = "maze-{}x{}-{}.txt".format(self.display.columns, self.display.rows, time())
+        file = path / filename
+        with open(file, 'w') as file:
             # Write the maze dimensions
             file.write("{} {}".format(self.display.columns, self.display.rows))
             for cell in self.cells:
