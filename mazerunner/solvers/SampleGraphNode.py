@@ -22,7 +22,7 @@ class SampleGraphNode:
         return self.distance < other.distance
 
     def __gt__(self, other):
-        return self.distance < other.distance
+        return self.distance > other.distance
 
     def __le__(self, other):
         return self.distance <= other.distance

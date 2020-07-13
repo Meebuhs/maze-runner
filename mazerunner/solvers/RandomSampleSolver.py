@@ -14,10 +14,11 @@ class RandomSampleSolver:
 
     def __init__(self, runner):
         self.runner = runner
-        self.max_nodes = 1000
-        self.max_distance = 1000
+        self.max_nodes = Config.SAMPLE_MAX_NODES
+        self.max_distance = Config.SAMPLE_MAX_DISTANCE
         # Current and goal cells, the cells assigned here are discarded once search is commenced
         self.id_counter = 0
+
         self.start_node = self.create_node(
             (self.runner.start_cell.x + 0.5) * self.runner.display.cell_dimension,
             (self.runner.start_cell.y + 0.5) * self.runner.display.cell_dimension)
@@ -32,19 +33,6 @@ class RandomSampleSolver:
         self.nodes = []
         self.adjacency_list = []
         self.queue = PriorityQueue()
-
-    def test_points(self):
-        first_x = 100
-        first_y = 100
-        second_x = 300
-        second_y = 100
-        node_1 = SampleGraphNode(first_x, first_y, 0)
-        node_2 = SampleGraphNode(second_x, second_y, 1)
-        self.runner.display.addEllipse(node_1.x, node_1.y, 5, 5, Config.CELL_QUEUE_PEN, Config.CELL_QUEUE_BRUSH)
-        self.runner.display.addEllipse(node_2.x, node_2.y, 5, 5, Config.CELL_QUEUE_PEN, Config.CELL_QUEUE_BRUSH)
-        if not self.has_path_collision(node_1, node_2):
-            self.runner.display.addLine(node_1.x, node_1.y, node_2.x, node_2.y, Config.CELL_QUEUE_PEN)
-        self.runner.display.update()
 
     def create_node(self, x, y):
         """ Creates a new sample node. """
@@ -68,18 +56,24 @@ class RandomSampleSolver:
     def run(self):
         """ Runs the solver. """
         self.sample()
-        self.construct_adjacency_list()
-        self.dijkstras_search()
+        if len(self.nodes) >= self.max_nodes:
+            self.construct_adjacency_list()
+            self.dijkstras_search()
 
     def sample(self):
         cell_dimension = self.runner.display.cell_dimension
         while len(self.nodes) < self.max_nodes:
+            if self.runner.paused:
+                break
             x = randint(0, self.runner.display.columns * cell_dimension - 5)
             y = randint(0, self.runner.display.rows * cell_dimension - 5)
-            if not abs(x % cell_dimension) < 2 or not abs(y % cell_dimension) < 2:
+            if abs(x % cell_dimension) > 4 and abs(y % cell_dimension) > 4:
                 self.nodes.append(self.create_node(x, y))
-                self.runner.display.addEllipse(x, y, 5, 5, Config.CELL_QUEUE_PEN, Config.CELL_QUEUE_BRUSH)
-                self.runner.display.update()
+                self.runner.sample_display_items.append(
+                    self.runner.display.addEllipse(x - 2.5, y - 2.5, 5, 5, Config.CELL_QUEUE_PEN,
+                                                   Config.CELL_QUEUE_BRUSH))
+                if self.runner.display.render_progress:
+                    self.runner.display.update()
                 QCoreApplication.processEvents()
 
     def construct_adjacency_list(self):
@@ -93,46 +87,46 @@ class RandomSampleSolver:
                         self.adjacency_list[node.id] += [other_node]
 
     def has_path_collision(self, node, other_node):
-        cell_dimension = self.runner.display.cell_dimension
         cells_to_check = self.get_cells_to_check(node, other_node)
         for cell in cells_to_check:
             if cell.walls['bottom']:
-                wall_x1 = cell.x * cell_dimension
-                wall_x2 = (cell.x + 1) * cell_dimension
-                wall_y1 = (cell.y + 1) * cell_dimension
-                wall_y2 = (cell.y + 1) * cell_dimension
-                if intersect((node.x, node.y), (other_node.x, other_node.y), (wall_x1, wall_y1),
-                             (wall_x2, wall_y2)):
+                if self.check_bottom_intersect(node, other_node, cell):
                     return True
             if cell.walls['right']:
-                wall_x1 = (cell.x + 1) * cell_dimension
-                wall_x2 = (cell.x + 1) * cell_dimension
-                wall_y1 = cell.y * cell_dimension
-                wall_y2 = (cell.y + 1) * cell_dimension
-                if intersect((node.x, node.y), (other_node.x, other_node.y), (wall_x1, wall_y1),
-                             (wall_x2, wall_y2)):
+                if self.check_right_wall(node, other_node, cell):
                     return True
             if cell.y > 0:
                 cell_above = self.runner.cells[self.runner.get_cell_index(cell.x, cell.y - 1)]
                 if cell_above.walls['bottom']:
-                    wall_x1 = cell_above.x * cell_dimension
-                    wall_x2 = (cell_above.x + 1) * cell_dimension
-                    wall_y1 = (cell_above.y + 1) * cell_dimension
-                    wall_y2 = (cell_above.y + 1) * cell_dimension
-                    if intersect((node.x, node.y), (other_node.x, other_node.y), (wall_x1, wall_y1),
-                                 (wall_x2, wall_y2)):
+                    if self.check_bottom_intersect(node, other_node, cell_above):
                         return True
             if cell.x > 0:
                 cell_to_left = self.runner.cells[self.runner.get_cell_index(cell.x - 1, cell.y)]
                 if cell_to_left.walls['right']:
-                    wall_x1 = (cell_to_left.x + 1) * cell_dimension
-                    wall_x2 = (cell_to_left.x + 1) * cell_dimension
-                    wall_y1 = cell_to_left.y * cell_dimension
-                    wall_y2 = (cell_to_left.y + 1) * cell_dimension
-                    if intersect((node.x, node.y), (other_node.x, other_node.y), (wall_x1, wall_y1),
-                                 (wall_x2, wall_y2)):
+                    if self.check_right_wall(node, other_node, cell_to_left):
                         return True
         return False
+
+    def check_bottom_intersect(self, node, other_node, cell):
+        """ Generates the positions defining the location of the cell's bottom wall and returns true if the path between
+            two nodes intersects it. """
+        cell_dimension = self.runner.display.cell_dimension
+        wall_x1 = cell.x * cell_dimension
+        wall_x2 = (cell.x + 1) * cell_dimension
+        wall_y1 = (cell.y + 1) * cell_dimension
+        wall_y2 = (cell.y + 1) * cell_dimension
+
+        return intersect((node.x, node.y), (other_node.x, other_node.y), (wall_x1, wall_y1), (wall_x2, wall_y2))
+
+    def check_right_wall(self, node, other_node, cell):
+        """ Generates the positions defining the location of the cell's right wall and returns true if the path between
+            two nodes intersects it. """
+        cell_dimension = self.runner.display.cell_dimension
+        wall_x1 = (cell.x + 1) * cell_dimension
+        wall_x2 = (cell.x + 1) * cell_dimension
+        wall_y1 = cell.y * cell_dimension
+        wall_y2 = (cell.y + 1) * cell_dimension
+        return intersect((node.x, node.y), (other_node.x, other_node.y), (wall_x1, wall_y1), (wall_x2, wall_y2))
 
     def get_cells_to_check(self, node, other_node):
         """ Returns a list of cells to check for collisions.
@@ -149,14 +143,11 @@ class RandomSampleSolver:
         start_x = path_x1 if x_range >= 0 else path_x2
         start_y = path_y1 if y_range >= 0 else path_y2
 
-        # print(path_x1, path_y1, path_x2, path_y2, x_range, y_range)
         cells = []
         for x_offset in range(abs(x_range) + 1):
             for y_offset in range(abs(y_range) + 1):
-                # print(start_x, x_offset, start_y, y_offset)
                 cells.append(self.runner.cells[self.runner.get_cell_index(start_x + x_offset, start_y + y_offset)])
 
-        # print(cells)
         return cells
 
     def dijkstras_search(self):
@@ -194,24 +185,10 @@ class RandomSampleSolver:
             print("Path not found")
             return
         for node, node2 in zip(path[:-1], path[1:]):
-            self.runner.display.addLine(node.x, node.y, node2.x, node2.y, Config.CELL_QUEUE_PEN)
+            self.runner.sample_display_items.append(
+                self.runner.display.addLine(node.x, node.y, node2.x, node2.y, Config.SAMPLER_PATH_PEN))
         self.runner.display.update()
         QCoreApplication.processEvents()
-
-    def test_collisions(self):
-        """ Tests a range of line segment intersections to determine if the collision detection is working as intended.
-        """
-        p1, p2, p3, p4, p5, p6, p7 = (1, 1), (1, 3), (2, 2), (2, 4), (3, 1), (3, 3), (4, 3)
-        print("should intersect")
-        print("2,6 and 3,4", intersect(p2, p6, p3, p4))
-        print("2,6 and 1,4", intersect(p2, p6, p1, p4))
-        print("2,3 and 1,4", intersect(p2, p3, p1, p4))
-        print("3,7 and 5,6", intersect(p3, p7, p5, p6))
-        print("shouldn't")
-        print("2,3 and 5,6", intersect(p2, p3, p5, p6))
-        print("2,6 and 3,7", intersect(p2, p6, p3, p7))
-        print("1,4 and 3,7", intersect(p1, p4, p3, p7))
-        print("1,4 and 5,6", intersect(p1, p4, p5, p6))
 
 
 def intersect(a1, a2, b1, b2):

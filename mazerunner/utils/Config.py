@@ -13,6 +13,10 @@ DEFAULT_MAZE_COLUMNS = 24
 DEFAULT_MAZE_ROWS = 12
 DEFAULT_CELL_DIMENSION = 50
 
+# Values for the random sample solver
+SAMPLE_MAX_NODES = 1200
+SAMPLE_MAX_DISTANCE = 100
+
 # Pens for drawing cell walls
 CELL_WALL_PEN = QPen(QColor(0, 0, 0), 1)
 CELL_VISITED_PEN = QPen(QColor(128, 222, 234), 1)
@@ -20,6 +24,9 @@ CELL_QUEUE_PEN = QPen(QColor(41, 182, 246), 1)
 CELL_CURRENT_PEN = QPen(QColor(25, 118, 210), 1)
 CELL_START_PEN = QPen(QColor(239, 83, 80), 1)
 CELL_END_PEN = QPen(QColor(102, 187, 106), 1)
+
+# Pen for drawing sampler path
+SAMPLER_PATH_PEN = QPen(QColor(102, 187, 106), 2)
 
 # Brushes for filling cells
 CELL_VISITED_BRUSH = QBrush(QColor(128, 222, 234))

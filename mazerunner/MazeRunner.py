@@ -18,6 +18,8 @@ class MazeRunner:
     def __init__(self, display):
         self.display = display
         self.cells = []
+        # References to the sample solvers display items for cleanup
+        self.sample_display_items = []
         # Class instance of solver, is set in start_search
         self.solver = None
         self.running = False
@@ -47,6 +49,10 @@ class MazeRunner:
     def reset_search(self):
         """ Resets the status of all cells to allow a new search to begin. """
         self.solved = False
+        if self.sample_display_items:
+            for item in self.sample_display_items:
+                self.display.removeItem(item)
+            self.sample_display_items = []
         for cell in self.cells:
             cell.reset()
 
@@ -73,8 +79,8 @@ class MazeRunner:
     def load_maze(self):
         """ Load a maze from a file. The expected format for the file has the dimensions of the maze on the first line
         in the format "columns rows" (two integers separated by a space). Then there are columns x rows lines, each
-        containing a 4 bit number. The lines are the cells in order where a 1 indicates a wall (ordered top right
-        bottom left). In total the file will have columns x rows + 1 lines
+        containing 2 binary digits indicating whether the cell has a bottom or right wall. In total the file will have
+        columns x rows + 1 lines
         """
         # Allow user to select filename
         dialog = QFileDialog()
