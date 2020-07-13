@@ -44,6 +44,9 @@ class MazeRunner:
             self.solver = AStarSolver(self)
         elif search_option == 'Random Sampling':
             self.solver = RandomSampleSolver(self)
+        elif search_option == 'Random Sampling':
+            self.solver = RandomSampleSolver(self)
+        self.running = True
         self.solver.start()
 
     def reset_search(self):
@@ -91,7 +94,6 @@ class MazeRunner:
             return False
 
         self.display.delete_grid()
-        self.reset_search()
         del self.cells[:]
 
         with open(filename, 'r') as file:

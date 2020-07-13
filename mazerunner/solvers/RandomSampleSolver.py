@@ -26,10 +26,17 @@ class RandomSampleSolver:
         self.goal_node = self.create_node(
             (self.runner.goal_cell.x + 0.5) * self.runner.display.cell_dimension,
             (self.runner.goal_cell.y + 0.5) * self.runner.display.cell_dimension)
-        self.runner.display.addEllipse(self.start_node.x - 5, self.start_node.y - 5, 5, 5, Config.CELL_QUEUE_PEN,
-                                       Config.CELL_QUEUE_BRUSH)
-        self.runner.display.addEllipse(self.goal_node.x - 5, self.goal_node.y - 5, 5, 5, Config.CELL_QUEUE_PEN,
-                                       Config.CELL_QUEUE_BRUSH)
+        self.line_items = []
+        self.ellipse_size = 6
+        self.ellipse_items = []
+        self.ellipse_items.append(
+            self.runner.display.addEllipse(self.start_node.x - self.ellipse_size, self.start_node.y - self.ellipse_size,
+                                           self.ellipse_size, self.ellipse_size, Config.CELL_QUEUE_PEN,
+                                           Config.CELL_QUEUE_BRUSH))
+        self.ellipse_items.append(
+            self.runner.display.addEllipse(self.goal_node.x - self.ellipse_size, self.goal_node.y - self.ellipse_size,
+                                           self.ellipse_size, self.ellipse_size, Config.CELL_QUEUE_PEN,
+                                           Config.CELL_QUEUE_BRUSH))
         self.nodes = []
         self.adjacency_list = []
         self.queue = PriorityQueue()
@@ -42,7 +49,6 @@ class RandomSampleSolver:
 
     def start(self):
         """ Starts the solver. """
-        # self.test_points()
         self.initialize()
         self.run()
 
@@ -60,18 +66,21 @@ class RandomSampleSolver:
             self.construct_adjacency_list()
             self.dijkstras_search()
 
+
     def sample(self):
+        """ Creates the sample points from which a path will be constructed. """
         cell_dimension = self.runner.display.cell_dimension
         while len(self.nodes) < self.max_nodes:
             if self.runner.paused:
                 break
-            x = randint(0, self.runner.display.columns * cell_dimension - 5)
-            y = randint(0, self.runner.display.rows * cell_dimension - 5)
-            if abs(x % cell_dimension) > 4 and abs(y % cell_dimension) > 4:
+            x = randint(0, self.runner.display.columns * cell_dimension)
+            y = randint(0, self.runner.display.rows * cell_dimension)
+            if abs(x % cell_dimension) > self.ellipse_size and abs(y % cell_dimension) > self.ellipse_size:
                 self.nodes.append(self.create_node(x, y))
-                self.runner.sample_display_items.append(
-                    self.runner.display.addEllipse(x - 2.5, y - 2.5, 5, 5, Config.CELL_QUEUE_PEN,
-                                                   Config.CELL_QUEUE_BRUSH))
+                self.ellipse_items.append(
+                    self.runner.display.addEllipse(x, y, self.ellipse_size, self.ellipse_size,
+                                                    Config.CELL_QUEUE_PEN,
+                                                    Config.CELL_QUEUE_BRUSH))
                 if self.runner.display.render_progress:
                     self.runner.display.update()
                 QCoreApplication.processEvents()
@@ -87,6 +96,7 @@ class RandomSampleSolver:
                         self.adjacency_list[node.id] += [other_node]
 
     def has_path_collision(self, node, other_node):
+        """ Returns true if a straight line path connecting node and other_node intersects with a cell wall. """
         cells_to_check = self.get_cells_to_check(node, other_node)
         for cell in cells_to_check:
             if cell.walls['bottom']:
@@ -132,7 +142,7 @@ class RandomSampleSolver:
         """ Returns a list of cells to check for collisions.
 
         Consider a path from cell (0,0) to (2, 3), the list of cells returned will those in the range (0-2, 0-3). The
-        same list of cells would be returned for a path from (2, 3) to (0, 0)"""
+        same list of cells would also be returned for a path from (2, 3) to (0, 0)"""
         cell_dimension = self.runner.display.cell_dimension
         path_x1 = int(floor(node.x / cell_dimension))
         path_y1 = int(floor(node.y / cell_dimension))
@@ -147,7 +157,6 @@ class RandomSampleSolver:
         for x_offset in range(abs(x_range) + 1):
             for y_offset in range(abs(y_range) + 1):
                 cells.append(self.runner.cells[self.runner.get_cell_index(start_x + x_offset, start_y + y_offset)])
-
         return cells
 
     def dijkstras_search(self):
@@ -185,15 +194,31 @@ class RandomSampleSolver:
             print("Path not found")
             return
         for node, node2 in zip(path[:-1], path[1:]):
-            self.runner.sample_display_items.append(
-                self.runner.display.addLine(node.x, node.y, node2.x, node2.y, Config.SAMPLER_PATH_PEN))
+            # Add half ellipse_size to hit node center
+            self.line_items.append(
+                self.runner.display.addLine(node.x + self.ellipse_size / 2, node.y + self.ellipse_size / 2,
+                                            node2.x + self.ellipse_size / 2, node2.y + self.ellipse_size / 2,
+                                            Config.SAMPLER_PATH_PEN))
         self.runner.display.update()
         QCoreApplication.processEvents()
 
+    def clear_display_items(self):
+        """ Removes the sample node ellipses and the path lines from the display. """
+        for ellipse in self.ellipse_items:
+            self.runner.display.removeItem(ellipse)
+        del self.ellipse_items[:]
+        for line in self.line_items:
+            self.runner.display.removeItem(line)
+        del self.line_items[:]
+
 
 def intersect(a1, a2, b1, b2):
+    """ Returns true if the two line segments with end-points a1, a2 and b1, b2 instersect. Each end-point is a tuple
+    (int, int) representing the (x, y) coordinates of the point. This is an implementation of a post by Bryce Boe
+    available here https://bryceboe.com/2006/10/23/line-segment-intersection-algorithm/ """
     return ccw(a1, b1, b2) != ccw(a2, b1, b2) and ccw(a1, a2, b1) != ccw(a1, a2, b2)
 
 
 def ccw(a, b, c):
+    """ Returns true if points a, b and c are in counterclockwise order. """
     return (c[1] - a[1]) * (b[0] - a[0]) > (b[1] - a[1]) * (c[0] - a[0])

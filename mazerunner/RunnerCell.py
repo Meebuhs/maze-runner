@@ -52,9 +52,16 @@ class RunnerCell(GeneratorCell):
         """ Reset the cell for a new search. """
         self.clear_visited()
         self.clear_parents()
+        self._solution = False
         self.cost = 0
         self._in_queue = False
-        self._solution = False
+        self.clear_display()
+
+    def clear_display(self):
+        self.line_items = []
+        self.generate_lines()
+        self.rect_item = None
+        self.generate_fill()
 
     @property
     def f_visited(self):

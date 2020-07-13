@@ -1,6 +1,6 @@
 from math import floor
 
-from PyQt5.QtCore import QRectF, QLineF, QCoreApplication, Qt
+from PyQt5.QtCore import QLineF, QCoreApplication, Qt
 from PyQt5.QtWidgets import QGraphicsScene
 
 import mazerunner.utils.Config as Config
@@ -27,23 +27,23 @@ class MazeRunnerScene(QGraphicsScene):
         height = self.rows * self.cell_dimension
         self.setSceneRect(0, Config.WINDOW_HEIGHT * Config.MAZE_WINDOW_VERTICAL_OFFSET_FACTOR, width, height)
         self.setItemIndexMethod(QGraphicsScene.NoIndex)
+        for cell in self.runner.cells:
+            self.draw_cell(cell)
 
-        cells = self.runner.cells
-        for cell in cells:
-            fill = cell.get_fill_rect()
-            if len(fill) > 0:
-                cell.rect_item = self.addRect(fill[0], fill[1], fill[2])
-            lines = cell.lines
-            for line in lines:
-                cell.add_line_item(self.addLine(line, Config.CELL_WALL_PEN))
+    def draw_cell(self, cell):
+        fill = cell.get_fill_rect()
+        if fill:
+            cell.rect_item = self.addRect(fill[0], fill[1], fill[2])
+        lines = cell.lines
+        for line in lines:
+            cell.add_line_item(self.addLine(line, Config.CELL_WALL_PEN))
 
     def start_search_on_click(self, search_option):
-        """ Prepare the solver to start a new search and start it. """
-        self.runner.running = False
+        """ Start a new search. """
         self.delete_grid()
         self.runner.reset_search()
-        self.init_grid()
-        self.runner.running = True
+        for cell in self.runner.cells:
+            self.draw_cell(cell)
         self.runner.start_search(search_option)
 
     def update_grid(self):
@@ -54,24 +54,13 @@ class MazeRunnerScene(QGraphicsScene):
                 old_lines = cell.line_items
                 for line in old_lines:
                     self.removeItem(line)
+                cell.clear_line_items()
                 old_rect_display = cell.rect_item
                 if old_rect_display is not None:
                     self.removeItem(old_rect_display)
 
-                new_rect_display = cell.get_fill_rect()
-                if len(new_rect_display) > 0:
-                    cell.rect_item = self.addRect(new_rect_display[0], new_rect_display[1], new_rect_display[2])
-                cell.clear_line_items()
-                new_lines = cell.lines
-                for line in new_lines:
-                    cell.add_line_item(self.addLine(line, Config.CELL_WALL_PEN))
+                self.draw_cell(cell)
                 cell.changed = False
-
-    def add_rect(self, cell, pen, brush):
-        """ Add a filling rect to the scene for the given cell with the given pen and brush. """
-        rect = QRectF(cell.x * self.cell_dimension + 1, cell.y * self.cell_dimension + 1,
-                      self.cell_dimension - 1, self.cell_dimension - 1)
-        self.rects.append(self.addRect(rect, pen, brush))
 
     def delete_grid(self):
         """ Deletes all items. """
@@ -85,6 +74,8 @@ class MazeRunnerScene(QGraphicsScene):
         for line in self.path:
             self.removeItem(line)
         del self.path[:]
+        if self.runner.solver and hasattr(self.runner.solver, "clear_display_items"):
+            self.runner.solver.clear_display_items()
 
     def draw_path(self, path):
         """ Draws a line connecting each of the cells in the given path. """
@@ -113,6 +104,8 @@ class MazeRunnerScene(QGraphicsScene):
             self.init_grid()
             self.runner.initialise_start_and_goal_cells()
             self.maze_loaded = True
+            self.update()
+            QCoreApplication.processEvents()
 
     def set_maze_dimensions(self, columns, rows):
         """ Sets the dimensions of the maze to the given columns and rows. """

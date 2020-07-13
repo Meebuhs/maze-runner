@@ -1,6 +1,6 @@
 from math import floor
 
-from PyQt5.QtCore import QCoreApplication, QRectF
+from PyQt5.QtCore import QCoreApplication
 from PyQt5.QtWidgets import QGraphicsScene
 
 import mazerunner.utils.Config as Config
@@ -75,12 +75,6 @@ class MazeGeneratorScene(QGraphicsScene):
                 for line in new_lines:
                     cell.add_line_item(self.addLine(line, Config.CELL_WALL_PEN))
                 cell.changed = False
-
-    def add_rect(self, cell, pen, brush):
-        """ Add a rect to the scene for the given cell with the given pen and brush. """
-        rect = QRectF(cell.x * self.cell_dimension + 1, cell.y * self.cell_dimension + 1,
-                      self.cell_dimension - 1, self.cell_dimension - 1)
-        self.rects.append(self.addRect(rect, pen, brush))
 
     def delete_grid(self):
         """ Deletes all items for every cell. """

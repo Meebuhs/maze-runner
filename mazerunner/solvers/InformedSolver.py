@@ -37,10 +37,10 @@ class InformedSolver:
             else:
                 for cell in self.runner.get_neighbours(self.current_cell):
                     if cell.parent is None:
-                        self.queue.put((self.calculate_cost(cell), cell))
                         cell.parent = self.current_cell
                         # Cost to cell is ignored by greedy search
                         cell.cost = self.current_cell.cost + 1
+                        self.queue.put((self.calculate_cost(cell), cell))
                         cell.in_queue = True
             self.runner.display.update_scene()
 
