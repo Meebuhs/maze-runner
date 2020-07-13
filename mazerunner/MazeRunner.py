@@ -9,6 +9,7 @@ from mazerunner.solvers.BiBFSSolver import BiBFSSolver
 from mazerunner.solvers.BiDFSSolver import BiDFSSolver
 from mazerunner.solvers.DFSSolver import DFSSolver
 from mazerunner.solvers.GreedySolver import GreedySolver
+from mazerunner.solvers.RandomSampleSolver import RandomSampleSolver
 
 
 class MazeRunner:
@@ -39,6 +40,11 @@ class MazeRunner:
             self.solver = GreedySolver(self)
         elif search_option == 'A*':
             self.solver = AStarSolver(self)
+        elif search_option == 'Random Sampling':
+            self.solver = RandomSampleSolver(self)
+        elif search_option == 'Random Sampling':
+            self.solver = RandomSampleSolver(self)
+        self.running = True
         self.solver.start()
 
     def reset_search(self):
@@ -70,8 +76,8 @@ class MazeRunner:
     def load_maze(self):
         """ Load a maze from a file. The expected format for the file has the dimensions of the maze on the first line
         in the format "columns rows" (two integers separated by a space). Then there are columns x rows lines, each
-        containing a 4 bit number. The lines are the cells in order where a 1 indicates a wall (ordered top right
-        bottom left). In total the file will have columns x rows + 1 lines
+        containing 2 binary digits indicating whether the cell has a bottom or right wall. In total the file will have
+        columns x rows + 1 lines
         """
         # Allow user to select filename
         dialog = QFileDialog()
@@ -82,7 +88,6 @@ class MazeRunner:
             return False
 
         self.display.delete_grid()
-        self.reset_search()
         del self.cells[:]
 
         with open(filename, 'r') as file:
