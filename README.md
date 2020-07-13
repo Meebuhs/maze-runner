@@ -9,6 +9,7 @@ The maze runner currently supports:
 - Uninformed Search
     - Breadth First Search (BFS)
     - Depth First Search (DFS)
+    - Random Sample Search
 - Bi-directional Uninformed Search
     - Bi-directional BFS
     - Bi-directional DFS
