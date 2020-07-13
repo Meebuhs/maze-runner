@@ -74,7 +74,10 @@ class RandomSampleSolver:
                 break
             x = randint(0, self.runner.display.columns * cell_dimension)
             y = randint(0, self.runner.display.rows * cell_dimension)
-            if abs(x % cell_dimension) > self.ellipse_size and abs(y % cell_dimension) > self.ellipse_size:
+            if cell_dimension - (x % cell_dimension) > self.ellipse_size and \
+                    x % cell_dimension > self.ellipse_size and \
+                    cell_dimension - (y % cell_dimension) > self.ellipse_size and \
+                    y % cell_dimension > self.ellipse_size:
                 self.nodes.append(self.create_node(x, y))
                 self.ellipse_items.append(
                     self.runner.display.addEllipse(x, y, self.ellipse_size, self.ellipse_size,
