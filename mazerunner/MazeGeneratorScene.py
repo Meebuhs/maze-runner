@@ -97,8 +97,8 @@ class MazeGeneratorScene(QGraphicsScene):
         self.set_cell_dimension()
 
     def set_cell_dimension(self):
-        """ Calculates an appropriate cell side length which allows the grid to be drawn on screen. This is not executed the
-        scene is currently processing. """
+        """ Calculates an appropriate cell side length which allows the grid to be drawn on screen. This is not
+        executed the scene is currently processing. """
         if not self.generator.running:
             self.cell_dimension = min(
                 floor(Config.WINDOW_WIDTH * Config.MAZE_WINDOW_WIDTH_REDUCTION_FACTOR / self.columns),

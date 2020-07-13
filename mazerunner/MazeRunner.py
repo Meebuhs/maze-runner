@@ -18,8 +18,6 @@ class MazeRunner:
     def __init__(self, display):
         self.display = display
         self.cells = []
-        # References to the sample solvers display items for cleanup
-        self.sample_display_items = []
         # Class instance of solver, is set in start_search
         self.solver = None
         self.running = False
@@ -52,10 +50,6 @@ class MazeRunner:
     def reset_search(self):
         """ Resets the status of all cells to allow a new search to begin. """
         self.solved = False
-        if self.sample_display_items:
-            for item in self.sample_display_items:
-                self.display.removeItem(item)
-            self.sample_display_items = []
         for cell in self.cells:
             cell.reset()
 

@@ -66,7 +66,6 @@ class RandomSampleSolver:
             self.construct_adjacency_list()
             self.dijkstras_search()
 
-
     def sample(self):
         """ Creates the sample points from which a path will be constructed. """
         cell_dimension = self.runner.display.cell_dimension
@@ -79,8 +78,8 @@ class RandomSampleSolver:
                 self.nodes.append(self.create_node(x, y))
                 self.ellipse_items.append(
                     self.runner.display.addEllipse(x, y, self.ellipse_size, self.ellipse_size,
-                                                    Config.CELL_QUEUE_PEN,
-                                                    Config.CELL_QUEUE_BRUSH))
+                                                   Config.CELL_QUEUE_PEN,
+                                                   Config.CELL_QUEUE_BRUSH))
                 if self.runner.display.render_progress:
                     self.runner.display.update()
                 QCoreApplication.processEvents()

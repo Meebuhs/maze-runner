@@ -2,10 +2,10 @@ from math import sqrt
 
 
 class SampleGraphNode:
-    def __init__(self, x, y, id):
+    def __init__(self, x, y, node_id):
         self.x = x
         self.y = y
-        self.id = id
+        self.id = node_id
         self.distance = float("inf")
         self.parent = None
 
